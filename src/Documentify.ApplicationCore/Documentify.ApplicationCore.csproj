@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Documentify.Domain\Documentify.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
