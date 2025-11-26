@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Documentify.Infrastructure.Data.Config
 {
-    internal class UserRateOfficeConfiguration : IEntityTypeConfiguration<UserRateOffice>
+    public class UserRateOfficeConfiguration : IEntityTypeConfiguration<UserRateOffice>
     {
         public void Configure(EntityTypeBuilder<UserRateOffice> builder)
         {

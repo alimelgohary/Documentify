@@ -1,6 +1,7 @@
 ﻿
 using Documentify.Domain.Entities.Comment;
 using Documentify.Domain.Entities.Common;
+using Documentify.Domain.Entities.Report;
 
 namespace Documentify.Domain.Entities
 {
@@ -9,5 +10,6 @@ namespace Documentify.Domain.Entities
         public ICollection<ServiceSuggestion>? ServiceSuggestions { get; set; }
         public ICollection<ServiceComment>? ServiceComments { get; set; }
         public string? ApproverId { get; set; }
+        public ICollection<ServiceReport>? Reports { get; set; }
     }
 }

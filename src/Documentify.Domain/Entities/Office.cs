@@ -1,5 +1,6 @@
 ﻿
 using Documentify.Domain.Entities.Common;
+using Documentify.Domain.Entities.Report;
 using System.Text;
 
 namespace Documentify.Domain.Entities
@@ -10,5 +11,7 @@ namespace Documentify.Domain.Entities
         public ICollection<OfficeStatus>? OfficeStatuses { get; set; }
         public ICollection<UserRateOffice>? UserRateOffices { get; set; }
         public ICollection<OfficeSuggestion>? OfficeSuggestions { get; set; }
+        public ICollection<OfficeReport>? Reports { get; set; }
+
     }
 }

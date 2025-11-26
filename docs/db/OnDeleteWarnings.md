@@ -1,4 +1,5 @@
 ### Before Deleting a user, writerId is set to null (client set null) (must include it)
+### Before Deleting an admin user, check if he resolved any reports and set ResolverId to null (manually)
 
 ### Before Deleting an office, delete suggestions associated with it (manually)
 

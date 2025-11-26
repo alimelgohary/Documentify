@@ -12,5 +12,7 @@ namespace Documentify.Infrastructure.Identity.Entities
         public ICollection<OfficeSuggestion>? UpvotedOfficeSuggestions { get; set; }
         public ICollection<Office>? RatedOffices { get; set; }
         public ICollection<UserRateOffice>? UserRateOffices { get; set; }
+        public ICollection<ReportBase>? Reports { get; set; }
+        public ICollection<ReportBase>? ResolvedReports { get; set; }
     }
 }
