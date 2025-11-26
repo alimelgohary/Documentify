@@ -1,11 +1,7 @@
 ﻿using Documentify.Domain.Entities;
+using Documentify.Infrastructure.Identity.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Documentify.Infrastructure.Data.Config
 {

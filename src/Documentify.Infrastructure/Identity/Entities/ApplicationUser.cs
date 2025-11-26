@@ -2,7 +2,7 @@
 using Documentify.Domain.Entities.Common;
 using Microsoft.AspNetCore.Identity;
 
-namespace Documentify.Infrastructure.Data
+namespace Documentify.Infrastructure.Identity.Entities
 {
     public class ApplicationUser : IdentityUser
     {

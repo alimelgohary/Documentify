@@ -1,4 +1,5 @@
 ﻿using Documentify.Infrastructure.Data;
+using Documentify.Infrastructure.Identity.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

@@ -1,5 +1,6 @@
 ﻿using Documentify.Domain.Entities;
 using Documentify.Domain.Entities.Common;
+using Documentify.Infrastructure.Identity.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
