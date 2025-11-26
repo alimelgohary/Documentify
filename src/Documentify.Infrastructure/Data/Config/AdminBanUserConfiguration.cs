@@ -1,4 +1,6 @@
-﻿using Documentify.Infrastructure.Identity;
+﻿using Documentify.Domain.Entities;
+using Documentify.Infrastructure.Identity;
+using Documentify.Infrastructure.Identity.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,13 +15,13 @@ namespace Documentify.Infrastructure.Data.Config
             builder.Property(abu => abu.Reason)
                 .HasMaxLength(AdminBanUser.ValidationConstants.ReasonMaxLength);
 
-            builder.HasOne(abu => abu.User)
+            builder.HasOne<ApplicationUser>()
                 .WithMany()
                 .HasForeignKey(abu => abu.UserId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired(true);
             
-            builder.HasOne(abu => abu.Admin)
+            builder.HasOne<ApplicationUser>()
                 .WithMany()
                 .HasForeignKey(abu => abu.AdminId)
                 .OnDelete(DeleteBehavior.SetNull)

@@ -13,6 +13,7 @@ namespace Documentify.Infrastructure.Data
         public DbSet<OfficeSuggestion> OfficeSuggestions { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Step> Steps { get; set; }
+        public DbSet<AdminBanUser> AdminBanUsers { get; set; }
         public DbSet<ServiceComment> ServiceComments { get; set; }
         public DbSet<ServiceSuggestionComment> ServiceSuggestionComments { get; set; }
         public DbSet<OfficeSuggestionComment> OfficeSuggestionComments { get; set; }
