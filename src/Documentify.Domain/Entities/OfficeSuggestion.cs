@@ -1,4 +1,5 @@
-﻿using Documentify.Domain.Entities.Common;
+﻿using Documentify.Domain.Entities.Comment;
+using Documentify.Domain.Entities.Common;
 
 namespace Documentify.Domain.Entities
 {
@@ -8,6 +9,7 @@ namespace Documentify.Domain.Entities
         public string Change { get; set; } = null!;
         public Guid? OfficeId { get; set; }
         public Office? Office { get; set; }
+        public ICollection<OfficeSuggestionComment>? OfficeSuggestionComments { get; set; }
     }
     public partial class OfficeSuggestion
     {
