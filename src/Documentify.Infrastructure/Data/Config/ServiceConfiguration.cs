@@ -11,7 +11,8 @@ namespace Documentify.Infrastructure.Data.Config
             builder.HasOne<ApplicationUser>()
                 .WithMany()
                 .HasForeignKey(s => s.ApproverId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
         }
     }
 }

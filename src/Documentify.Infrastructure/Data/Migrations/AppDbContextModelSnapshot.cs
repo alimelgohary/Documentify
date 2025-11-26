@@ -64,7 +64,7 @@ namespace Documentify.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("Documentify.Domain.Entities.Common.OfficeBase", b =>
@@ -125,7 +125,7 @@ namespace Documentify.Infrastructure.Data.Migrations
 
                     b.HasIndex("WriterId");
 
-                    b.ToTable("OfficeBase");
+                    b.ToTable("OfficeBase", (string)null);
 
                     b.HasDiscriminator().HasValue("OfficeBase");
 
@@ -181,7 +181,7 @@ namespace Documentify.Infrastructure.Data.Migrations
 
                     b.HasIndex("WriterId");
 
-                    b.ToTable("ServiceBase");
+                    b.ToTable("ServiceBase", (string)null);
 
                     b.HasDiscriminator().HasValue("ServiceBase");
 
@@ -209,7 +209,7 @@ namespace Documentify.Infrastructure.Data.Migrations
 
                     b.HasIndex("OfficeId");
 
-                    b.ToTable("OfficeStatus");
+                    b.ToTable("OfficeStatus", (string)null);
                 });
 
             modelBuilder.Entity("Documentify.Domain.Entities.Step", b =>
@@ -244,7 +244,7 @@ namespace Documentify.Infrastructure.Data.Migrations
 
                     b.HasIndex("InnerServiceId");
 
-                    b.ToTable("Steps");
+                    b.ToTable("Steps", (string)null);
                 });
 
             modelBuilder.Entity("Documentify.Domain.Entities.UserRateOffice", b =>
@@ -266,7 +266,7 @@ namespace Documentify.Infrastructure.Data.Migrations
 
                     b.HasIndex("RaterId");
 
-                    b.ToTable("UserRateOffice");
+                    b.ToTable("UserRateOffice", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -488,7 +488,7 @@ namespace Documentify.Infrastructure.Data.Migrations
 
                     b.HasIndex("ServicesId");
 
-                    b.ToTable("ServiceOfficeAvailability");
+                    b.ToTable("ServiceOfficeAvailability", (string)null);
                 });
 
             modelBuilder.Entity("Documentify.Domain.Entities.Office", b =>

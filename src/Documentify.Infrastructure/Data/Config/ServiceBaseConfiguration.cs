@@ -35,11 +35,14 @@ namespace Documentify.Infrastructure.Data.Config
             builder.HasOne(s => s.Category)
                 .WithMany(c => c.Services)
                 .HasForeignKey(s => s.CategoryId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired(true);
 
             builder.HasMany(s => s.Steps)
                 .WithOne(step => step.AssociatedService)
-                .HasForeignKey(s => s.AssociatedServiceId);
+                .HasForeignKey(s => s.AssociatedServiceId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
 
             builder.HasMany(x => x.Offices)
                    .WithMany(x => x.Services)
@@ -48,7 +51,8 @@ namespace Documentify.Infrastructure.Data.Config
             builder.HasOne<ApplicationUser>()
                 .WithMany(u => u.ServicesWritten)
                 .HasForeignKey(s => s.WriterId)
-                .OnDelete(DeleteBehavior.ClientSetNull);
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .IsRequired(false);
         }
     }
 }

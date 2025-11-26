@@ -12,9 +12,8 @@ namespace Documentify.Infrastructure.Data
         public DbSet<OfficeSuggestion> OfficeSuggestions { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Step> Steps { get; set; }
-        //TODO: on delete
 
-
+        
         public AppDbContext(DbContextOptions options) : base(options) {}
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

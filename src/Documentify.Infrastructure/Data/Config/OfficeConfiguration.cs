@@ -12,11 +12,14 @@ namespace Documentify.Infrastructure.Data.Config
             builder.HasOne<ApplicationUser>()
                 .WithMany()
                 .HasForeignKey(o => o.ApproverId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
 
             builder.HasMany(x => x.OfficeStatuses)
                    .WithOne(x => x.Office)
-                   .HasForeignKey(x => x.OfficeId);
+                   .HasForeignKey(x => x.OfficeId)
+                   .OnDelete(DeleteBehavior.Cascade)
+                   .IsRequired(true);
         }
     }
 }

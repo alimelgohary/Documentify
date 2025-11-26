@@ -28,11 +28,15 @@ namespace Documentify.Infrastructure.Data.Config
                 .UsingEntity<UserRateOffice>(
                     j => j.HasOne(x => x.Office)
                             .WithMany(x => x.UserRateOffices)
-                            .HasForeignKey(x => x.OfficeId),
+                            .HasForeignKey(x => x.OfficeId)
+                            .OnDelete(DeleteBehavior.Cascade)
+                            .IsRequired(true),
 
                     j => j.HasOne<ApplicationUser>()
                     .WithMany(x => x.UserRateOffices)
-                    .HasForeignKey(x => x.RaterId),
+                    .HasForeignKey(x => x.RaterId)
+                     .OnDelete(DeleteBehavior.Cascade)
+                     .IsRequired(true),
 
                     j => j.HasKey(uo => new { uo.OfficeId, uo.RaterId })
                 );

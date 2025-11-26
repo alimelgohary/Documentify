@@ -19,7 +19,9 @@ namespace Documentify.Infrastructure.Data.Config
 
             builder.HasOne(x => x.Office)
                     .WithMany(x => x.OfficeSuggestions)
-                    .HasForeignKey(x => x.OfficeId);
+                    .HasForeignKey(x => x.OfficeId)
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .IsRequired(false);
         }
     }
 }

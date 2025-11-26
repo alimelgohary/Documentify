@@ -18,7 +18,9 @@ namespace Documentify.Infrastructure.Data.Config
 
             builder.HasOne(x => x.Service)
                 .WithMany(x => x.ServiceSuggestions)
-                .HasForeignKey(x => x.ServiceId);
+                .HasForeignKey(x => x.ServiceId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .IsRequired(false);
         }
     }
 }

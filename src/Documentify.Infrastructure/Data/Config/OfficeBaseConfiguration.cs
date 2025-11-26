@@ -55,7 +55,8 @@ namespace Documentify.Infrastructure.Data.Config
             builder.HasOne<ApplicationUser>()
                 .WithMany(u => u.OfficesWritten)
                 .HasForeignKey(o => o.WriterId)
-                .OnDelete(DeleteBehavior.ClientSetNull);
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .IsRequired(false);
 
         }
     }

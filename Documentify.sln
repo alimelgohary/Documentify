@@ -13,6 +13,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Documentify.Domain", "src\D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Documentify.Infrastructure", "src\Documentify.Infrastructure\Documentify.Infrastructure.csproj", "{1701742D-03BC-9D3F-9562-40EA21BC563A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{5B5364FF-38BD-466D-915D-69419D91C9C4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DB", "DB", "{D8E4AE67-48B7-4A1C-8C48-76C4240629C9}"
+	ProjectSection(SolutionItems) = preProject
+		OnDeleteWarnings.md = OnDeleteWarnings.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +51,7 @@ Global
 		{8FAB2D3D-A1CB-4A69-B9DE-186AE268D7BB} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{704DCC91-FE7F-4F76-8DBF-7AF9F2451A3F} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{1701742D-03BC-9D3F-9562-40EA21BC563A} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{D8E4AE67-48B7-4A1C-8C48-76C4240629C9} = {5B5364FF-38BD-466D-915D-69419D91C9C4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BE96A528-A867-41AA-AE7A-37A7CB2204AA}
