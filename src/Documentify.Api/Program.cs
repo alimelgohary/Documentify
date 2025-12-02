@@ -1,4 +1,5 @@
 using Documentify.Infrastructure;
+using Documentify.ApplicationCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddInfrastructure(builder.Configuration, builder.Environment); // TODO: Pass logger
+builder.Services.AddMediatR(
+    cfg => cfg.RegisterServicesFromAssemblyContaining<IApplicationCoreMarker>());
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
