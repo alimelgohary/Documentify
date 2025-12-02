@@ -1,5 +1,9 @@
 using Documentify.Infrastructure;
 using Documentify.ApplicationCore;
+using FluentValidation;
+using MediatR;
+using Documentify.ApplicationCore.Common.Behaviors;
+using Documentify.Api.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +18,9 @@ builder.Services.AddInfrastructure(builder.Configuration, builder.Environment); 
 builder.Services.AddMediatR(
     cfg => cfg.RegisterServicesFromAssemblyContaining<IApplicationCoreMarker>());
 
+builder.Services.AddValidatorsFromAssembly(typeof(IApplicationCoreMarker).Assembly);
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -22,7 +29,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
