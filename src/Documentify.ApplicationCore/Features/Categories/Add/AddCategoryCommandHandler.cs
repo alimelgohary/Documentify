@@ -1,13 +1,17 @@
-﻿using MediatR;
+﻿using Documentify.ApplicationCore.Repository;
+using Documentify.Domain.Entities;
+using MediatR;
 namespace Documentify.ApplicationCore.Features.Categories.Add
 {
-    public class AddCategoryCommandHandler : IRequestHandler<AddCategoryCommand, AddCategoryResponse>
+    public class AddCategoryCommandHandler(IUnitOfWork<Category, Guid> _unitOfWork) : IRequestHandler<AddCategoryCommand, AddCategoryResponse>
     {
-        public async Task<AddCategoryResponse> Handle(AddCategoryCommand request, CancellationToken cancellationToken)
+        public async Task<AddCategoryResponse> Handle(AddCategoryCommand request, CancellationToken ct)
         {
-            var x = request.categoryName;
-            // add pipeline to validate object/ logging / handle not found
-            return new(Guid.NewGuid());
+            // add pipeline to logging / handle not found exceptions
+            var category = new Category() { Name = request.categoryName };
+            await _unitOfWork.Repository.AddAsync(category, ct);
+            await _unitOfWork.CompleteAsync(ct);
+            return new AddCategoryResponse(categoryId: category.Id);
         }
     }
 }

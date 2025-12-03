@@ -1,4 +1,4 @@
 ﻿namespace Documentify.ApplicationCore.Features.Categories.GetAll
 {
-    public record GetAllCategoriesResponse(IEnumerable<CategoryDto> Items, int Count);
+    public record GetAllCategoriesResponse(List<CategoryDto> items, int count);
 }

@@ -1,5 +1,7 @@
-﻿using Documentify.Infrastructure.Data;
+﻿using Documentify.ApplicationCore.Repository;
+using Documentify.Infrastructure.Data;
 using Documentify.Infrastructure.Identity.Entities;
+using Documentify.Infrastructure.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +20,9 @@ namespace Documentify.Infrastructure
             ILogger logger = null) // TODO: Add logging and remove default value
         {
             serviceCollection.AddDatabase(configuration, environment, logger);
+
+            serviceCollection.AddRepositories(logger);
+
             serviceCollection.AddIdentity<ApplicationUser, IdentityRole>(opt => 
             {
                 opt.Password.RequireDigit = true;
@@ -52,6 +57,13 @@ namespace Documentify.Infrastructure
             }
             serviceCollection.AddDbContext<AppDbContext>(
                 opt => opt.UseSqlServer(connectionString));
+            return serviceCollection;
+        }
+        public static IServiceCollection AddRepositories(this IServiceCollection serviceCollection,
+            ILogger logger = null)
+        {
+            serviceCollection.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
+            serviceCollection.AddScoped(typeof(IUnitOfWork<,>), typeof(UnitOfWork<,>));
             return serviceCollection;
         }
     }

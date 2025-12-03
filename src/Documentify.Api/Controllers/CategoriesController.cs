@@ -18,7 +18,7 @@ namespace Documentify.Api.Controllers
         public async Task<ActionResult<AddCategoryResponse>> Create([FromBody] AddCategoryCommand command, CancellationToken ct)
         {
             var result = await _mediator.Send(command, ct);
-            return CreatedAtAction("Index", new { Id = result.CategoryId }, result);
+            return CreatedAtAction("Index", new { Id = result.categoryId }, result);
         }
     }
 }

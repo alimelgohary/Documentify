@@ -1,12 +1,16 @@
-﻿using MediatR;
+﻿using Documentify.ApplicationCore.Repository;
+using Documentify.Domain.Entities;
+using MediatR;
 
 namespace Documentify.ApplicationCore.Features.Categories.GetAll
 {
-    public class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCategoriesQuery, GetAllCategoriesResponse>
+    public class GetAllCategoriesQueryHandler(IUnitOfWork<Category, Guid> _unitOfWork) : IRequestHandler<GetAllCategoriesQuery, GetAllCategoriesResponse>
     {
-        public Task<GetAllCategoriesResponse> Handle(GetAllCategoriesQuery request, CancellationToken cancellationToken)
+        public async Task<GetAllCategoriesResponse> Handle(GetAllCategoriesQuery request, CancellationToken ct)
         {
-            return Task.FromResult(new GetAllCategoriesResponse([new(Guid.NewGuid(), "Cat1")], 1));
+            var categories = await _unitOfWork.Repository.ListAsync(new GetAllCategoriesSpec(), ct);
+            var items = categories.Select(x => new CategoryDto(x.Id, x.Name)).ToList();
+            return new GetAllCategoriesResponse(items, items.Count);
         }
     }
 }

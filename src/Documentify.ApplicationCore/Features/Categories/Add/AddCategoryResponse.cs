@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace Documentify.ApplicationCore.Features.Categories.Add
 {
-    public record AddCategoryResponse(Guid CategoryId);
+    public record AddCategoryResponse(Guid categoryId);
 }

@@ -6,7 +6,7 @@ namespace Documentify.Domain.Entities
     public partial class Category
     {
         public Guid Id { get; set; }
-        public Guid Name { get; set; }
+        public string Name { get; set; } = null!;
         public ICollection<ServiceBase>? Services { get; set; }
     }
     public partial class Category
