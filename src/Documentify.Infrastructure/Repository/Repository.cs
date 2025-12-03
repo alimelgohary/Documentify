@@ -13,7 +13,7 @@ namespace Documentify.Infrastructure.Repository
             await _context.Set<T>().AddAsync(entity, token);
         }
 
-        public void DeleteAsync(T entity)
+        public void Delete(T entity)
         {
             _context.Set<T>().Remove(entity);
         }
@@ -38,7 +38,7 @@ namespace Documentify.Infrastructure.Repository
             return _context.Set<T>().WithSpecification(specification).ToListAsync(token);
         }
 
-        public void UpdateAsync(T entity)
+        public void Update(T entity)
         {
             _context.Set<T>().Update(entity);
         }

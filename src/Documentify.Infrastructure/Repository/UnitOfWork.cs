@@ -8,12 +8,24 @@ using System.Threading.Tasks;
 
 namespace Documentify.Infrastructure.Repository
 {
-    public class UnitOfWork<T, PK>(AppDbContext _context, IRepository<T, PK> repo) : IUnitOfWork<T, PK>
+    public class UnitOfWork(AppDbContext _context) : IUnitOfWork
     {
-        public IRepository<T, PK> Repository { get; } = repo;
-        public async Task CompleteAsync(CancellationToken token = default)
+        private readonly Dictionary<Type, object> _repositories = new();
+        public IRepository<T, PK> Repository<T, PK>() where T : class
         {
-            await _context.SaveChangesAsync();
+            var type = typeof(T);
+
+            if (!_repositories.ContainsKey(type))
+            {
+                var repo = new Repository<T, PK>(_context);
+                _repositories[type] = repo;
+            }
+
+            return (IRepository<T, PK>)_repositories[type];
+        }
+        public async Task<int> CompleteAsync(CancellationToken token = default)
+        {
+            return await _context.SaveChangesAsync();
         }
     }
 }

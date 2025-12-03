@@ -7,8 +7,8 @@ namespace Documentify.ApplicationCore.Repository
         Task<List<T>> ListAsync(CancellationToken token = default);
         Task<List<T>> ListAsync(Specification<T> specification, CancellationToken token = default);
         Task AddAsync(T entity, CancellationToken token = default);
-        void DeleteAsync(T entity);
-        void UpdateAsync(T entity);
+        void Delete(T entity);
+        void Update(T entity);
         Task<bool> ExistsAsync(TPK id, CancellationToken token = default);
     }
 }

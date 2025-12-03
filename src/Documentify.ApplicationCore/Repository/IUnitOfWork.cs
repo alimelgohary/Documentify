@@ -1,8 +1,8 @@
 ﻿namespace Documentify.ApplicationCore.Repository
 {
-    public interface IUnitOfWork<T, PK>
+    public interface IUnitOfWork
     {
-        public IRepository<T, PK> Repository { get; }
-        Task CompleteAsync(CancellationToken token = default);
+        public IRepository<T, PK> Repository<T, PK>() where T : class;
+        Task<int> CompleteAsync(CancellationToken token = default);
     }
 }

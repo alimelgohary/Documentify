@@ -62,8 +62,7 @@ namespace Documentify.Infrastructure
         public static IServiceCollection AddRepositories(this IServiceCollection serviceCollection,
             ILogger logger = null)
         {
-            serviceCollection.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
-            serviceCollection.AddScoped(typeof(IUnitOfWork<,>), typeof(UnitOfWork<,>));
+            serviceCollection.AddScoped<IUnitOfWork, UnitOfWork>();
             return serviceCollection;
         }
     }

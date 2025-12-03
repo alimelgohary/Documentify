@@ -11,7 +11,7 @@ namespace Documentify.Api.Controllers
     public class CategoriesController(IMediator _mediator) : ControllerBase
     {
         [HttpGet]
-        public async Task<IActionResult> Index(CancellationToken ct)
+        public async Task<ActionResult<GetAllCategoriesResponse>> Index(CancellationToken ct)
             => Ok(await _mediator.Send(new GetAllCategoriesQuery(), ct));
 
         [HttpPost]
