@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Documentify.Domain.Entities.Common
 {
-    public partial class OfficeBase
+    public partial class OfficeBase : EntityBase
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = null!;

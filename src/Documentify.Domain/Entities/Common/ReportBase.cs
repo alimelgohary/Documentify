@@ -1,7 +1,7 @@
 ﻿
 namespace Documentify.Domain.Entities.Common
 {
-    public partial class ReportBase
+    public partial class ReportBase : EntityBase
     {
         public Guid Id { get; set; }
         public DateTime ReportedAt { get; set; } = DateTime.UtcNow;

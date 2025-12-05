@@ -1,6 +1,8 @@
-﻿namespace Documentify.Domain.Entities
+﻿using Documentify.Domain.Entities.Common;
+
+namespace Documentify.Domain.Entities
 {
-    public partial class AdminBanUser
+    public partial class AdminBanUser : EntityBase
     {
         public string? AdminId { get; set; } = null!;
         public string UserId { get; set; } = null!;

@@ -1,6 +1,6 @@
 ﻿namespace Documentify.Domain.Entities.Common
 {
-    public abstract partial class CommentBase
+    public abstract partial class CommentBase : EntityBase
     {
         public Guid Id { get; set; }
         public string CommenterId { get; set; } = null!;

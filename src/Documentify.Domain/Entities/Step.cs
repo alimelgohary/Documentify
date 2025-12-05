@@ -3,7 +3,7 @@ using Documentify.Domain.Entities.Common;
 
 namespace Documentify.Domain.Entities
 {
-    public partial class Step
+    public partial class Step : EntityBase
     {
         public int Order { get; set; }
         public int TimeRequired { get; set; }

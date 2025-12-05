@@ -1,6 +1,8 @@
-﻿namespace Documentify.Domain.Entities
+﻿using Documentify.Domain.Entities.Common;
+
+namespace Documentify.Domain.Entities
 {
-    public partial class UserRateOffice
+    public partial class UserRateOffice : EntityBase
     {
         public byte Rating { get; set; }
         public string? Comment { get; set; }

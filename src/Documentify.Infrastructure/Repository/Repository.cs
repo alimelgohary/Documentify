@@ -1,12 +1,13 @@
 ﻿using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
 using Documentify.ApplicationCore.Repository;
+using Documentify.Domain.Entities.Common;
 using Documentify.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Documentify.Infrastructure.Repository
 {
-    public class Repository<T, TPK>(AppDbContext _context) : IRepository<T, TPK> where T : class
+    public class Repository<T, TPK>(AppDbContext _context) : IRepository<T, TPK> where T : EntityBase
     {
         public async Task AddAsync(T entity, CancellationToken token = default)
         {

@@ -1,6 +1,6 @@
 ﻿namespace Documentify.Domain.Entities.Common
 {
-    public partial class ServiceBase
+    public partial class ServiceBase : EntityBase
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = null!;

@@ -3,7 +3,7 @@ using Documentify.Domain.Entities.Common;
 
 namespace Documentify.Domain.Entities
 {
-    public partial class Category
+    public partial class Category : EntityBase
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = null!;

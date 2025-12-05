@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Documentify.Domain.Entities.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Documentify.Domain.Entities
 {
-    public partial class OfficeStatus
+    public partial class OfficeStatus : EntityBase
     {
         public Guid Id { get; set; }
         public Guid OfficeId { get; set; }

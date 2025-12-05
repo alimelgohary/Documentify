@@ -1,7 +1,8 @@
 ﻿using Ardalis.Specification;
+using Documentify.Domain.Entities.Common;
 namespace Documentify.ApplicationCore.Repository
 {
-    public interface IRepository<T, TPK>
+    public interface IRepository<T, TPK> where T : EntityBase
     {
         Task<T?> GetByIdAsync(TPK id, CancellationToken token = default);
         Task<List<T>> ListAsync(CancellationToken token = default);

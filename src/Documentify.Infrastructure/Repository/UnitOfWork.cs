@@ -1,4 +1,5 @@
 ﻿using Documentify.ApplicationCore.Repository;
+using Documentify.Domain.Entities.Common;
 using Documentify.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace Documentify.Infrastructure.Repository
     public class UnitOfWork(AppDbContext _context) : IUnitOfWork
     {
         private readonly Dictionary<Type, object> _repositories = new();
-        public IRepository<T, PK> Repository<T, PK>() where T : class
+        public IRepository<T, PK> Repository<T, PK>() where T : EntityBase
         {
             var type = typeof(T);
 
