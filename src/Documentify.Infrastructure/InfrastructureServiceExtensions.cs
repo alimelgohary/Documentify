@@ -17,12 +17,15 @@ namespace Documentify.Infrastructure
         public static IServiceCollection AddInfrastructure(this IServiceCollection serviceCollection,
             IConfiguration configuration,
             IHostEnvironment environment,
-            ILogger logger = null) // TODO: Add logging and remove default value
+            ILogger logger)
         {
+            logger.LogInformation("Configuring infrastructure services");
+
             serviceCollection.AddDatabase(configuration, environment, logger);
 
-            serviceCollection.AddRepositories(logger);
+            serviceCollection.AddUow(logger);
 
+            logger.LogInformation("Configuring identity");
             serviceCollection.AddIdentity<ApplicationUser, IdentityRole>(opt => 
             {
                 opt.Password.RequireDigit = true;
@@ -38,8 +41,9 @@ namespace Documentify.Infrastructure
         public static IServiceCollection AddDatabase(this IServiceCollection serviceCollection,
             IConfiguration configuration,
             IHostEnvironment environment,
-            ILogger logger = null)
+            ILogger logger)
         {
+            logger.LogInformation("Configuring database connection");
             string? connectionString = null;
             if (environment.IsDevelopment())
             {
@@ -52,16 +56,17 @@ namespace Documentify.Infrastructure
 
             if (string.IsNullOrEmpty(connectionString))
             {
-                logger?.LogCritical("Unable to find connection string with key: {connectionStringKey}", connectionString);
+                logger.LogCritical("Unable to find connection string with key: {connectionStringKey}", connectionString);
                 Environment.Exit(1);
             }
             serviceCollection.AddDbContext<AppDbContext>(
                 opt => opt.UseSqlServer(connectionString));
             return serviceCollection;
         }
-        public static IServiceCollection AddRepositories(this IServiceCollection serviceCollection,
-            ILogger logger = null)
+        public static IServiceCollection AddUow(this IServiceCollection serviceCollection,
+            ILogger logger)
         {
+            logger.LogInformation("Registering unit of work");
             serviceCollection.AddScoped<IUnitOfWork, UnitOfWork>();
             return serviceCollection;
         }

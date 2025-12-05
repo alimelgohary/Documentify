@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Documentify.Api.Middlewares
 {
@@ -25,6 +24,8 @@ namespace Documentify.Api.Middlewares
         }
         async Task HandleValidationExceptionAsync(ValidationException ex, HttpContext context)
         {
+            var loggedErrors = ex.Errors.Select(e => new { e.PropertyName, e.ErrorMessage, e.AttemptedValue });
+            _logger.LogInformation("Validation error: {@loggedErrors}", loggedErrors);
             await Results.ValidationProblem(
                 errors: ex.Errors.GroupBy(x => x.PropertyName)
                                 .ToDictionary(
@@ -35,7 +36,7 @@ namespace Documentify.Api.Middlewares
         }
         async Task HandleUnknownExceptionAsync(Exception ex, HttpContext context)
         {
-            _logger.LogError(ex.Message);
+            _logger.LogError("Unhandled Exception {Message} {StackTrace}", ex.Message, ex.StackTrace);
             var problem = new ProblemDetails()
             {
                 Status = StatusCodes.Status500InternalServerError,

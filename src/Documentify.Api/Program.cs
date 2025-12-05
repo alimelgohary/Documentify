@@ -1,39 +1,30 @@
-using Documentify.Infrastructure;
-using Documentify.ApplicationCore;
-using FluentValidation;
-using MediatR;
-using Documentify.ApplicationCore.Common.Behaviors;
-using Documentify.Api.Middlewares;
-
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddInfrastructure(builder.Configuration, builder.Environment); // TODO: Pass logger
-builder.Services.AddMediatR(
-    cfg => cfg.RegisterServicesFromAssemblyContaining<IApplicationCoreMarker>());
-
-builder.Services.AddValidatorsFromAssembly(typeof(IApplicationCoreMarker).Assembly);
-builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+using Documentify.Api;
+using Serilog;
+using Serilog.Extensions.Logging;
+try
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    var builder = WebApplication.CreateBuilder(args);
+
+    // Configure Serilog and create a logger
+    Log.Logger = new LoggerConfiguration()
+        .ReadFrom.Configuration(builder.Configuration)
+        .CreateLogger();
+    Log.Information("Starting web application");
+    var appLogger = new SerilogLoggerFactory(Log.Logger).CreateLogger<Program>();
+
+    builder.Services.AddApiServices(builder.Configuration, builder.Environment, appLogger);
+    
+    var app = builder.Build();
+    
+    app.UseApi(app.Environment, appLogger);
+
+    app.Run();
 }
-app.UseMiddleware<ExceptionHandlerMiddleware>();
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
