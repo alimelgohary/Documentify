@@ -9,6 +9,7 @@ namespace Documentify.Api
         public static WebApplication UseApi(this WebApplication app, IHostEnvironment environment, Microsoft.Extensions.Logging.ILogger logger)
         {
             app.UseSerilogRequestMiddleware();
+            app.UseMiddleware<IdempotencyMiddleware>();
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();

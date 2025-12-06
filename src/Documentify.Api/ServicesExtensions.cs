@@ -21,6 +21,7 @@ namespace Documentify.Api
                     .AddInfrastructure(configuration, environment, logger)
                     .AddValidatorsFromAssembly(typeof(IApplicationCoreMarker).Assembly)
                     .AddMediator();
+            services.AddMemoryCache();
             return services;
         }
         public static IServiceCollection AddSwagger(this IServiceCollection services)
