@@ -4,12 +4,11 @@ using MediatR;
 using Documentify.Infrastructure;
 using FluentValidation;
 using Serilog;
-
 namespace Documentify.Api
 {
     public static class ServicesExtensions
     {
-        public static IServiceCollection AddApiServices(this IServiceCollection services,
+        public async static Task<IServiceCollection> AddApiServices(this IServiceCollection services,
                                                              IConfiguration configuration,
                                                              IHostEnvironment environment,
                                                              Microsoft.Extensions.Logging.ILogger logger
@@ -17,11 +16,14 @@ namespace Documentify.Api
         {
             services.AddControllers();
             services.AddSerilogLogging()
-                    .AddSwagger()
-                    .AddInfrastructure(configuration, environment, logger)
-                    .AddValidatorsFromAssembly(typeof(IApplicationCoreMarker).Assembly)
-                    .AddMediator();
-            services.AddMemoryCache();
+                    .AddSwagger();
+
+            await services.AddInfrastructure(configuration, environment, logger);
+
+            services.AddValidatorsFromAssembly(typeof(IApplicationCoreMarker).Assembly)
+                    .AddMediator()
+                    .AddMemoryCache();
+
             return services;
         }
         public static IServiceCollection AddSwagger(this IServiceCollection services)

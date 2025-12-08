@@ -1,32 +1,94 @@
-﻿using Documentify.ApplicationCore.Repository;
+﻿using Documentify.ApplicationCore.Common.Interfaces;
+using Documentify.ApplicationCore.Repository;
 using Documentify.Infrastructure.Data;
+using Documentify.Infrastructure.Identity;
 using Documentify.Infrastructure.Identity.Entities;
 using Documentify.Infrastructure.Repository;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 namespace Documentify.Infrastructure
 {
     public static class InfrastructureServiceExtensions
     {
-        private static readonly string connectionStringKey = "connectionStrings:DocumentifyConnection";
-        public static IServiceCollection AddInfrastructure(this IServiceCollection serviceCollection,
+        public static class ConfigurationKeys
+        {
+            public const string JwtSecret = "Jwt:Key";
+            public const string JwtIssuer = "Jwt:Issuer";
+            public const string GoogleClientId = "Authentication:Google:ClientId";
+            public const string GoogleClientSecret = "Authentication:Google:ClientSecret";
+            public const string DocumentifyConnectionString = "connectionStrings:DocumentifyConnection";
+        }
+        static async Task ValidateConfiguration(IConfiguration configuration, ILogger logger)
+        {
+            var fields = typeof(ConfigurationKeys).GetFields();
+            List<string> errors = new List<string>(fields.Length);
+            
+            logger.LogInformation("Validating infrastructure configuration");
+            foreach(var field in fields)
+            {
+                var key = field.GetValue(null)!.ToString()!;
+                logger.LogDebug("Checking configuration key: {key}", key);
+               
+                if (string.IsNullOrEmpty(configuration[key!]))
+                    errors.Add(key);
+            }
+            if (errors.Any())
+            {
+                logger.LogCritical("Missing required configuration setting: {errors}", string.Join(",", errors));
+                await Task.Delay(5000); // To Flush logs
+                Environment.Exit(1);
+            }
+        }
+
+        public async static Task<IServiceCollection> AddInfrastructure(this IServiceCollection serviceCollection,
             IConfiguration configuration,
             IHostEnvironment environment,
             ILogger logger)
         {
             logger.LogInformation("Configuring infrastructure services");
+            
+            await ValidateConfiguration(configuration, logger);
 
             serviceCollection.AddDatabase(configuration, environment, logger);
 
             serviceCollection.AddUow(logger);
 
+            serviceCollection.AddIdentityAndAuthentication(configuration, environment, logger);
+            return serviceCollection;
+        }
+        static IServiceCollection AddDatabase(this IServiceCollection serviceCollection,
+            IConfiguration configuration,
+            IHostEnvironment environment,
+            ILogger logger)
+        {
+            logger.LogInformation("Configuring database connection");
+            string connectionString = configuration[ConfigurationKeys.DocumentifyConnectionString]!;
+
+            serviceCollection.AddDbContext<AppDbContext>(
+                opt => opt.UseSqlServer(connectionString));
+            return serviceCollection;
+        }
+        static IServiceCollection AddUow(this IServiceCollection serviceCollection,
+            ILogger logger)
+        {
+            logger.LogInformation("Registering unit of work");
+            serviceCollection.AddScoped<IUnitOfWork, UnitOfWork>();
+            return serviceCollection;
+        }
+        static IServiceCollection AddIdentityAndAuthentication(this IServiceCollection serviceCollection,
+            IConfiguration configuration,
+            IHostEnvironment environment,
+            ILogger logger)
+        {
             logger.LogInformation("Configuring identity");
-            serviceCollection.AddIdentity<ApplicationUser, IdentityRole>(opt => 
+            serviceCollection.AddIdentity<ApplicationUser, IdentityRole>(opt =>
             {
                 opt.Password.RequireDigit = true;
                 opt.Password.RequireLowercase = true;
@@ -34,40 +96,36 @@ namespace Documentify.Infrastructure
                 opt.Password.RequireNonAlphanumeric = false;
                 opt.Password.RequiredLength = 8;
                 opt.User.RequireUniqueEmail = true;
-            }).AddEntityFrameworkStores<AppDbContext>();
-            
-            return serviceCollection;
-        }
-        public static IServiceCollection AddDatabase(this IServiceCollection serviceCollection,
-            IConfiguration configuration,
-            IHostEnvironment environment,
-            ILogger logger)
-        {
-            logger.LogInformation("Configuring database connection");
-            string? connectionString = null;
-            if (environment.IsDevelopment())
-            {
-                connectionString = configuration[connectionStringKey];
-            }
-            else
-            {
-                connectionString = Environment.GetEnvironmentVariable(connectionStringKey);
-            }
+            }).AddEntityFrameworkStores<AppDbContext>()
+              .AddDefaultTokenProviders();
 
-            if (string.IsNullOrEmpty(connectionString))
+            serviceCollection.AddAuthentication(options =>
             {
-                logger.LogCritical("Unable to find connection string with key: {connectionStringKey}", connectionString);
-                Environment.Exit(1);
-            }
-            serviceCollection.AddDbContext<AppDbContext>(
-                opt => opt.UseSqlServer(connectionString));
-            return serviceCollection;
-        }
-        public static IServiceCollection AddUow(this IServiceCollection serviceCollection,
-            ILogger logger)
-        {
-            logger.LogInformation("Registering unit of work");
-            serviceCollection.AddScoped<IUnitOfWork, UnitOfWork>();
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = configuration[ConfigurationKeys.JwtIssuer],
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(configuration[ConfigurationKeys.JwtSecret]!))
+                };
+            }).AddGoogle(googleOptions =>
+            {
+                googleOptions.ClientId = configuration[ConfigurationKeys.GoogleClientId]!;
+                googleOptions.ClientSecret = configuration[ConfigurationKeys.GoogleClientSecret]!;
+                googleOptions.Scope.Add("profile");
+                googleOptions.Scope.Add("email");
+            });
+
+            serviceCollection.AddScoped<IExternalAuthService, ExternalAuthService>();
+            serviceCollection.AddScoped<ITokenGenerator, JwtTokenGenerator>();
             return serviceCollection;
         }
     }
