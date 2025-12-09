@@ -28,3 +28,4 @@ finally
 {
     Log.CloseAndFlush();
 }
+public partial class Program { } // For integration tests referencing Program class
