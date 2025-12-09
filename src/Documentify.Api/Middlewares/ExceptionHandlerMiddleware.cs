@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Documentify.ApplicationCore.Common.Exceptions;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Documentify.Api.Middlewares
@@ -16,6 +17,16 @@ namespace Documentify.Api.Middlewares
             catch (ValidationException ex)
             {
                 await HandleValidationExceptionAsync(ex, context);
+            }
+            catch (NotFoundException ex)
+            {
+                _logger.LogInformation("Not Found Exception: {Message}", ex.Message);
+                var problem = new ProblemDetails()
+                {
+                    Status = StatusCodes.Status404NotFound,
+                    Detail = ex.Message
+                };
+                await Results.Problem(problem).ExecuteAsync(context);
             }
             catch (Exception ex)
             {

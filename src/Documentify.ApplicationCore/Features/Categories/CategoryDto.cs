@@ -1,7 +1,19 @@
-﻿namespace Documentify.ApplicationCore.Features.Categories
+﻿using Documentify.Domain.Entities;
+
+namespace Documentify.ApplicationCore.Features.Categories
 {
-    public record CategoryDto(
-        Guid Id,
-        string Name
-    );
+    public record CategoryDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public CategoryDto(Guid Id, string Name)
+        {
+            this.Id = Id;
+            this.Name = Name;
+        }
+        public CategoryDto(Category category) : this(category.Id, category.Name)
+        {
+            
+        }
+    }
 }

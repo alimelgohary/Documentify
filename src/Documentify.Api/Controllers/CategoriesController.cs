@@ -1,6 +1,6 @@
 ﻿using Documentify.ApplicationCore.Features.Categories.Add;
 using Documentify.ApplicationCore.Features.Categories.GetAll;
-using FluentValidation;
+using Documentify.ApplicationCore.Features.Categories.GetById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,6 +10,10 @@ namespace Documentify.Api.Controllers
     [Route("[controller]")]
     public class CategoriesController(IMediator _mediator) : ControllerBase
     {
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id, CancellationToken ct) 
+            => Ok(await _mediator.Send(new GetCategoryByIdQuery(id), ct)); 
+
         [HttpGet]
         public async Task<ActionResult<GetAllCategoriesResponse>> Index(CancellationToken ct)
             => Ok(await _mediator.Send(new GetAllCategoriesQuery(), ct));
@@ -18,7 +22,7 @@ namespace Documentify.Api.Controllers
         public async Task<ActionResult<AddCategoryResponse>> Create([FromBody] AddCategoryCommand command, CancellationToken ct)
         {
             var result = await _mediator.Send(command, ct);
-            return CreatedAtAction("Index", new { Id = result.categoryId }, result);
+            return CreatedAtAction(nameof(GetById), new { Id = result.categoryId }, result);
         }
     }
 }
