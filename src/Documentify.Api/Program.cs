@@ -12,7 +12,7 @@ try
     Log.Information("Starting web application");
     var appLogger = new SerilogLoggerFactory(Log.Logger).CreateLogger<Program>();
     
-    await builder.Services.AddApiServices(builder.Configuration, builder.Environment, appLogger);
+    builder.Services.AddApiServices(builder.Configuration, builder.Environment, appLogger);
     
     var app = builder.Build();
     

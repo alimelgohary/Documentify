@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using MediatR;
 using Documentify.ApplicationCore.Features.ExternalAuth;
+using Documentify.ApplicationCore.Features.Auth.Login;
+using Documentify.ApplicationCore.Features.Auth.Register;
 
 namespace Documentify.Controllers
 {
@@ -28,6 +30,13 @@ namespace Documentify.Controllers
         [HttpGet("GoogleResponse")]
         public async Task<IActionResult> GoogleResponse() 
             => Ok(await _sender.Send(new ExternalLoginCommand()));
-        
+
+        [HttpPost("Register")]
+        public async Task<IActionResult> Register(RegisterCommand command) 
+            => Ok(await _sender.Send(command));
+
+        [HttpPost("Login")]
+        public async Task<IActionResult> Login(LoginCommand command) 
+            => Ok(await _sender.Send(command));
     }
 }

@@ -8,7 +8,7 @@ namespace Documentify.Api
 {
     public static class ServicesExtensions
     {
-        public async static Task<IServiceCollection> AddApiServices(this IServiceCollection services,
+        public static IServiceCollection AddApiServices(this IServiceCollection services,
                                                              IConfiguration configuration,
                                                              IHostEnvironment environment,
                                                              Microsoft.Extensions.Logging.ILogger logger
@@ -16,11 +16,9 @@ namespace Documentify.Api
         {
             services.AddControllers();
             services.AddSerilogLogging()
-                    .AddSwagger();
-
-            await services.AddInfrastructure(configuration, environment, logger);
-
-            services.AddValidatorsFromAssembly(typeof(IApplicationCoreMarker).Assembly)
+                    .AddSwagger()
+                    .AddInfrastructure(configuration, environment, logger)
+                    .AddValidatorsFromAssembly(typeof(IApplicationCoreMarker).Assembly)
                     .AddMediator()
                     .AddMemoryCache();
 

@@ -18,15 +18,13 @@ namespace Documentify.Api.Middlewares
             {
                 await HandleValidationExceptionAsync(ex, context);
             }
+            catch (BadRequestException ex)
+            {
+                await HandleBadRequestExceptionAsync(ex, context);
+            }
             catch (NotFoundException ex)
             {
-                _logger.LogInformation("Not Found Exception: {Message}", ex.Message);
-                var problem = new ProblemDetails()
-                {
-                    Status = StatusCodes.Status404NotFound,
-                    Detail = ex.Message
-                };
-                await Results.Problem(problem).ExecuteAsync(context);
+                await HandleNotFoundExceptionAsync(ex, context);
             }
             catch (Exception ex)
             {
@@ -45,6 +43,27 @@ namespace Documentify.Api.Middlewares
                                 )
             ).ExecuteAsync(context);
         }
+        async Task HandleBadRequestExceptionAsync(BadRequestException ex, HttpContext context)
+        {
+            _logger.LogInformation("Bad Request: {Message}", ex.Message);
+            var problem = new ProblemDetails()
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Detail = ex.Message
+            };
+            await Results.Problem(problem).ExecuteAsync(context);
+        }
+        async Task HandleNotFoundExceptionAsync(NotFoundException ex, HttpContext context)
+        {
+            _logger.LogInformation("Not Found Exception: {Message}", ex.Message);
+            var problem = new ProblemDetails()
+            {
+                Status = StatusCodes.Status404NotFound,
+                Detail = ex.Message
+            };
+            await Results.Problem(problem).ExecuteAsync(context);
+        }
+
         async Task HandleUnknownExceptionAsync(Exception ex, HttpContext context)
         {
             _logger.LogError("Unhandled Exception {Message} {StackTrace}", ex.Message, ex.StackTrace);

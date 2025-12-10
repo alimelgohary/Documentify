@@ -12,6 +12,9 @@ namespace Documentify.Infrastructure.Identity
     {
         public string GenerateToken(string userId, string userEmail)
         {
+            int expiryMinutes = int.Parse(_configuration[ConfigurationKeys.JwtExpiryMinutes]!);
+            string secret = _configuration[ConfigurationKeys.JwtSecret]!;
+            string issuer = _configuration[ConfigurationKeys.JwtIssuer]!;
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, userId),
@@ -19,13 +22,13 @@ namespace Documentify.Infrastructure.Identity
             };
             
             var key = new SymmetricSecurityKey(
-                                Encoding.UTF8.GetBytes(_configuration[ConfigurationKeys.JwtSecret]!));
+                                Encoding.UTF8.GetBytes(secret));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
-                issuer: _configuration[ConfigurationKeys.JwtIssuer],
+                issuer: issuer,
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(2),
+                expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
                 signingCredentials: creds
             );
 

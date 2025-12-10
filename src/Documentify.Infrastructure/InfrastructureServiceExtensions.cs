@@ -21,11 +21,12 @@ namespace Documentify.Infrastructure
         {
             public const string JwtSecret = "Jwt:Key";
             public const string JwtIssuer = "Jwt:Issuer";
+            public const string JwtExpiryMinutes = "Jwt:ExpiryMinutes";
             public const string GoogleClientId = "Authentication:Google:ClientId";
             public const string GoogleClientSecret = "Authentication:Google:ClientSecret";
             public const string DocumentifyConnectionString = "connectionStrings:DocumentifyConnection";
         }
-        static async Task ValidateConfiguration(IConfiguration configuration, ILogger logger)
+        static void ValidateConfiguration(IConfiguration configuration, ILogger logger)
         {
             var fields = typeof(ConfigurationKeys).GetFields();
             List<string> errors = new List<string>(fields.Length);
@@ -41,20 +42,18 @@ namespace Documentify.Infrastructure
             }
             if (errors.Any())
             {
-                logger.LogCritical("Missing required configuration setting: {errors}", string.Join(",", errors));
-                await Task.Delay(5000); // To Flush logs
-                Environment.Exit(1);
+                throw new Exception("Missing required configuration setting: " + string.Join(",", errors));
             }
         }
 
-        public async static Task<IServiceCollection> AddInfrastructure(this IServiceCollection serviceCollection,
+        public static IServiceCollection AddInfrastructure(this IServiceCollection serviceCollection,
             IConfiguration configuration,
             IHostEnvironment environment,
             ILogger logger)
         {
             logger.LogInformation("Configuring infrastructure services");
             
-            await ValidateConfiguration(configuration, logger);
+            ValidateConfiguration(configuration, logger);
 
             serviceCollection.AddDatabase(configuration, environment, logger);
 
@@ -125,6 +124,7 @@ namespace Documentify.Infrastructure
             });
 
             serviceCollection.AddScoped<IExternalAuthService, ExternalAuthService>();
+            serviceCollection.AddScoped<IAuthService, AuthService>();
             serviceCollection.AddScoped<ITokenGenerator, JwtTokenGenerator>();
             return serviceCollection;
         }
