@@ -5,6 +5,7 @@ using MediatR;
 using Documentify.ApplicationCore.Features.ExternalAuth;
 using Documentify.ApplicationCore.Features.Auth.Login;
 using Documentify.ApplicationCore.Features.Auth.Register;
+using Documentify.ApplicationCore.Features.Auth.RefreshToken;
 
 namespace Documentify.Controllers
 {
@@ -38,5 +39,10 @@ namespace Documentify.Controllers
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginCommand command) 
             => Ok(await _sender.Send(command));
+
+        [HttpPost("RefreshToken")]
+        public async Task<IActionResult> RefreshToken(RefreshTokenCommand refreshTokenCommand)
+            => Ok(await _sender.Send(refreshTokenCommand));
+
     }
 }

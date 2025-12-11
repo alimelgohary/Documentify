@@ -4,6 +4,7 @@ using Documentify.ApplicationCore.Repository;
 using Documentify.Domain.Entities.Common;
 using Documentify.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Documentify.Infrastructure.Repository
 {
@@ -22,6 +23,11 @@ namespace Documentify.Infrastructure.Repository
         public virtual async Task<bool> ExistsAsync(TPK id, CancellationToken token = default)
         {
             return await _context.Set<T>().AnyAsync(e => EF.Property<TPK>(e, "Id").Equals(id), token);
+        }
+
+        public virtual async Task<bool> ExistsAsync(Expression<Func<T, bool>> criteria, CancellationToken token = default)
+        {
+            return await _context.Set<T>().AnyAsync(criteria, token);
         }
 
         public async Task<T?> GetByIdAsync(TPK id, CancellationToken token = default)

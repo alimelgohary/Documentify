@@ -21,7 +21,7 @@ namespace Documentify.Infrastructure.Identity
             
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
             if (result.Succeeded)
-                return tokenGenerator.GenerateToken(userId, email);
+                return tokenGenerator.GenerateToken(userId, email, JwtTokenType.Jwt);
 
             var user = new ApplicationUser
             {
@@ -35,7 +35,7 @@ namespace Documentify.Infrastructure.Identity
                 throw new Exception("Error creating user");
                 
             await _userManager.AddLoginAsync(user, info);
-            return tokenGenerator.GenerateToken(userId, email);
+            return tokenGenerator.GenerateToken(userId, email, JwtTokenType.Jwt);
         }
     }
 }

@@ -20,13 +20,14 @@ namespace Documentify.Infrastructure
         public static class ConfigurationKeys
         {
             public const string JwtSecret = "Jwt:Key";
+            public const string JwtRefreshSecret = "Jwt:RefreshSecret";
             public const string JwtIssuer = "Jwt:Issuer";
             public const string JwtExpiryMinutes = "Jwt:ExpiryMinutes";
+            public const string JwtRefreshExpiryMinutes = "Jwt:RefreshExpiryMinutes";
             public const string GoogleClientId = "Authentication:Google:ClientId";
             public const string GoogleClientSecret = "Authentication:Google:ClientSecret";
             public const string DocumentifyConnectionString = "connectionStrings:DocumentifyConnection";
             public const string MaxRequestTimeWarningThreshold = "MaxRequestTimeWarningThreshold";
-
         }
         static void ValidateConfiguration(IConfiguration configuration, ILogger logger)
         {
