@@ -3,11 +3,11 @@ using System.Net.Http.Json;
 
 namespace Documentify.IntegrationTests.MiddlewaresTests
 {
-    public class IdempotencyTests : IClassFixture<CustomWebApplicationFactory<Program>>
+    public class IdempotencyTests : IClassFixture<NoDbWebApplicationFactory<Program>>
     {
         private readonly HttpClient _client;
-        private readonly CustomWebApplicationFactory<Program> _factory;
-        public IdempotencyTests(CustomWebApplicationFactory<Program> factory)
+        private readonly NoDbWebApplicationFactory<Program> _factory;
+        public IdempotencyTests(NoDbWebApplicationFactory<Program> factory)
         {
             _factory = factory;
             _client = _factory.CreateClient();

@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Documentify.IntegrationTests
 {
-    public class CustomWebApplicationFactory<T> : WebApplicationFactory<T> where T : class
+    public class NoDbWebApplicationFactory<T> : WebApplicationFactory<T> where T : class
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {

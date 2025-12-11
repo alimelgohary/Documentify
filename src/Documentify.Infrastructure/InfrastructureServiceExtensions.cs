@@ -25,6 +25,8 @@ namespace Documentify.Infrastructure
             public const string GoogleClientId = "Authentication:Google:ClientId";
             public const string GoogleClientSecret = "Authentication:Google:ClientSecret";
             public const string DocumentifyConnectionString = "connectionStrings:DocumentifyConnection";
+            public const string MaxRequestTimeWarningThreshold = "MaxRequestTimeWarningThreshold";
+
         }
         static void ValidateConfiguration(IConfiguration configuration, ILogger logger)
         {
@@ -108,10 +110,10 @@ namespace Documentify.Infrastructure
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
-                    ValidateAudience = true,
+                    ValidIssuer = configuration[ConfigurationKeys.JwtIssuer],
+                    ValidateAudience = false,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = configuration[ConfigurationKeys.JwtIssuer],
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(configuration[ConfigurationKeys.JwtSecret]!))
                 };

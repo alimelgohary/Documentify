@@ -2,6 +2,7 @@
 using Documentify.ApplicationCore.Features.Categories.GetAll;
 using Documentify.ApplicationCore.Features.Categories.GetById;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Documentify.Api.Controllers
@@ -19,6 +20,7 @@ namespace Documentify.Api.Controllers
             => Ok(await _mediator.Send(new GetAllCategoriesQuery(), ct));
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<AddCategoryResponse>> Create([FromBody] AddCategoryCommand command, CancellationToken ct)
         {
             var result = await _mediator.Send(command, ct);

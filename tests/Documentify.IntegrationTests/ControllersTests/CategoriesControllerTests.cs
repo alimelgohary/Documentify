@@ -8,12 +8,12 @@ using System.Net.Http.Json;
 
 namespace Documentify.IntegrationTests.ControllersTests
 {
-    public class CategoriesControllerTests : IClassFixture<CustomWebApplicationFactory<Program>>
+    public class CategoriesControllerTests : IClassFixture<NoAuthNoDbWebApplicationFactory<Program>>
     {
         private readonly HttpClient _client;
-        private readonly CustomWebApplicationFactory<Program> _factory;
+        private readonly NoAuthNoDbWebApplicationFactory<Program> _factory;
         private readonly string path = "/categories";
-        public CategoriesControllerTests(CustomWebApplicationFactory<Program> factory)
+        public CategoriesControllerTests(NoAuthNoDbWebApplicationFactory<Program> factory)
         {
             _client = factory.CreateClient();
             _factory = factory;
