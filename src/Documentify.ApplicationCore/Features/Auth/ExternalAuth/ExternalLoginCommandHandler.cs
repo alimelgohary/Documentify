@@ -2,7 +2,7 @@
 using Documentify.Domain.Enums;
 using MediatR;
 
-namespace Documentify.ApplicationCore.Features.ExternalAuth
+namespace Documentify.ApplicationCore.Features.Auth.ExternalAuth
 {
     public class ExternalLoginCommandHandler(IExternalAuthService externalAuthService) : IRequestHandler<ExternalLoginCommand, string>
     {
