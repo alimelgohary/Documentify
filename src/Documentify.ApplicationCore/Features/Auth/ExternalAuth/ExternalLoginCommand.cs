@@ -1,5 +1,6 @@
-﻿using MediatR;
+﻿using Documentify.ApplicationCore.Features.Auth.Login;
+using MediatR;
 namespace Documentify.ApplicationCore.Features.Auth.ExternalAuth
 {
-    public record ExternalLoginCommand() : IRequest<string>;
+    public record ExternalLoginCommand() : IRequest<ExternalLoginCommandResponse>;
 }

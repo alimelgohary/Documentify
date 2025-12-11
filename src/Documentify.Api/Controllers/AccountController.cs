@@ -2,10 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using MediatR;
-using Documentify.ApplicationCore.Features.ExternalAuth;
 using Documentify.ApplicationCore.Features.Auth.Login;
 using Documentify.ApplicationCore.Features.Auth.Register;
 using Documentify.ApplicationCore.Features.Auth.RefreshToken;
+using Documentify.ApplicationCore.Features.Auth.ExternalAuth;
 
 namespace Documentify.Controllers
 {
