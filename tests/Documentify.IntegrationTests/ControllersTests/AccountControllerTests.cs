@@ -144,7 +144,7 @@ namespace Documentify.IntegrationTests.ControllersTests
                 Content = JsonContent.Create(newCategory)
             };
 
-            request.Headers.Add("Authorization", "Bearer " + JsonDocument.Parse(res).RootElement.GetProperty("token").GetString());
+            request.Headers.Add("Authorization", "Bearer " + JsonDocument.Parse(res).RootElement.GetProperty("accessToken").GetString());
             var postResult = await _client.SendAsync(request);
             if (!postResult.IsSuccessStatusCode)
                 Assert.Fail($"Authorized request failed: {postResult.StatusCode}, {await postResult.Content.ReadAsStringAsync()}");

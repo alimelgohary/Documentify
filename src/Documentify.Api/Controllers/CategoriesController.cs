@@ -20,7 +20,7 @@ namespace Documentify.Api.Controllers
             => Ok(await _mediator.Send(new GetAllCategoriesQuery(), ct));
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<ActionResult<AddCategoryResponse>> Create([FromBody] AddCategoryCommand command, CancellationToken ct)
         {
             var result = await _mediator.Send(command, ct);
