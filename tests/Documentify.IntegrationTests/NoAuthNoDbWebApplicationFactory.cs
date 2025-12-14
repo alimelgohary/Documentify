@@ -49,8 +49,8 @@ namespace Documentify.IntegrationTests
         {
             var user = new ApplicationUser
             {
-                UserName = "TestUser4",
-                Email = "user4@gmail.com"
+                UserName = "TestUser0",
+                Email = "user0@gmail.com"
             };
             await _userManager.CreateAsync(user);
             var claims = new[]

@@ -64,7 +64,8 @@ namespace Documentify.Infrastructure.Identity
                     ValidateIssuer = true,
                     ValidIssuer = issuer,
                     ValidateAudience = false,
-                    ValidateLifetime = true
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
                 }, out SecurityToken token);
             }
             catch (Exception ex)

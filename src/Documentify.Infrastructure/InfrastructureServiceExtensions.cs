@@ -114,6 +114,7 @@ namespace Documentify.Infrastructure
                     ValidIssuer = configuration[ConfigurationKeys.JwtIssuer],
                     ValidateAudience = false,
                     ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero,
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(configuration[ConfigurationKeys.JwtSecret]!))

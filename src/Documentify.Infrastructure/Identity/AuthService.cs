@@ -69,14 +69,13 @@ namespace Documentify.Infrastructure.Identity
             var expiryMinutes = int.Parse(_configuration[ConfigurationKeys.JwtExpiryMinutes]!);
             var expiryMinutesRefresh = int.Parse(_configuration[ConfigurationKeys.JwtRefreshExpiryMinutes]!);
 
-            var oldRefreshTokenExpiry = new JwtSecurityTokenHandler().ReadJwtToken(oldRefreshToken).ValidTo;
-
             bool IsRevoked = await unitOfWork.Repository<RevokedRefreshToken, int>()
-                                    .ExistsAsync(x => x.Token == oldRefreshToken);
+                                                    .ExistsAsync(x => x.Token == oldRefreshToken);
 
             if(IsRevoked)
                 throw new BadRequestException("Refresh token has been revoked.");
-
+            
+            var oldRefreshTokenExpiry = new JwtSecurityTokenHandler().ReadJwtToken(oldRefreshToken).ValidTo;
             await unitOfWork.Repository<RevokedRefreshToken, int>().AddAsync(
                 new RevokedRefreshToken
                 {
