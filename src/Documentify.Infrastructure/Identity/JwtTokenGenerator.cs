@@ -1,5 +1,6 @@
 ﻿using Documentify.ApplicationCore.Common.Exceptions;
 using Documentify.ApplicationCore.Common.Interfaces;
+using Documentify.Domain.Enums;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -12,7 +13,7 @@ namespace Documentify.Infrastructure.Identity
 {
     public class JwtTokenGenerator(IConfiguration _configuration, ILogger<JwtTokenGenerator> _logger) : ITokenGenerator
     {
-        public string GenerateToken(string userId, string userEmail, JwtTokenType type)
+        public string GenerateToken(string userId, string userEmail, Role[] roles, JwtTokenType type)
         {
             int expiryMinutes = 0;
             string secret = "";
@@ -32,7 +33,7 @@ namespace Documentify.Infrastructure.Identity
             {
                 new Claim(ClaimTypes.NameIdentifier, userId),
                 new Claim(ClaimTypes.Email, userEmail)
-            };
+            }.Concat(roles.Select(x => new Claim(ClaimTypes.Role, x.ToString())));
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -56,7 +57,6 @@ namespace Documentify.Infrastructure.Identity
 
             try
             {
-                _logger.LogError(tokenHandler.ReadJwtToken(oldRefreshToken).Issuer);
                 tokenHandler.ValidateToken(oldRefreshToken, new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
@@ -82,9 +82,19 @@ namespace Documentify.Infrastructure.Identity
                     ?? throw new BadRequestException("Invalid refresh token, no email");
 
             var id = token.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value
-                    ?? throw new BadRequestException("Invalid refresh token, no sub");
+                    ?? throw new BadRequestException("Invalid token, no sub");
 
-            return GenerateToken(id, email, type);
+            var rolesClaims = token.Claims.Where(c => c.Type == ClaimTypes.Role).ToList();
+
+            List<Role> roles = new List<Role>(rolesClaims.Count);
+            foreach (var role in rolesClaims)
+            {
+                if (Enum.TryParse(role.Value, out Role r))
+                    roles.Add(r);
+                else
+                    throw new BadRequestException("Invalid token, invalid role");
+            }
+            return GenerateToken(id, email, roles.ToArray(), type);
         }
     }
 }

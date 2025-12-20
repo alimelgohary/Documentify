@@ -1,4 +1,5 @@
 using Documentify.Api;
+using Documentify.ApplicationCore;
 using Serilog;
 using Serilog.Extensions.Logging;
 try
@@ -17,6 +18,9 @@ try
     var app = builder.Build();
     
     app.UseApi(app.Environment, appLogger);
+
+    var scope = app.Services.CreateScope();
+    await scope.ServiceProvider.GetRequiredService<ISeedDatabase>().Seed();
 
     app.Run();
 }

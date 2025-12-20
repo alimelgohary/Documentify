@@ -1,4 +1,5 @@
-﻿using Documentify.ApplicationCore.Common.Interfaces;
+﻿using Documentify.ApplicationCore;
+using Documentify.ApplicationCore.Common.Interfaces;
 using Documentify.ApplicationCore.Repository;
 using Documentify.Infrastructure.Data;
 using Documentify.Infrastructure.Identity;
@@ -75,6 +76,8 @@ namespace Documentify.Infrastructure
 
             serviceCollection.AddDbContext<AppDbContext>(
                 opt => opt.UseSqlServer(connectionString));
+
+            serviceCollection.AddScoped<ISeedDatabase, SeedDatabase>();
             return serviceCollection;
         }
         static IServiceCollection AddUow(this IServiceCollection serviceCollection,
