@@ -18,7 +18,7 @@ namespace Documentify.Infrastructure.BackgroundTasks
             _timer = new Timer(
                 CleanupTokens,
                 null,
-                _interval, // Delay first run by interval
+                TimeSpan.FromMinutes(1), // Delay first run by 1 minute
                 _interval  // Run every _interval
             );
             return Task.CompletedTask;
