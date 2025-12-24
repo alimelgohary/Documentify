@@ -1,6 +1,7 @@
 ﻿using Documentify.ApplicationCore;
 using Documentify.ApplicationCore.Common.Interfaces;
 using Documentify.ApplicationCore.Repository;
+using Documentify.Infrastructure.BackgroundTasks;
 using Documentify.Infrastructure.Data;
 using Documentify.Infrastructure.Identity;
 using Documentify.Infrastructure.Identity.Entities;
@@ -59,11 +60,11 @@ namespace Documentify.Infrastructure
             
             ValidateConfiguration(configuration, logger);
 
-            serviceCollection.AddDatabase(configuration, environment, logger);
+            serviceCollection.AddDatabase(configuration, environment, logger)
+                             .AddUow(logger)
+                             .AddIdentityAndAuthentication(configuration, environment, logger)
+                             .AddHostedServices();
 
-            serviceCollection.AddUow(logger);
-
-            serviceCollection.AddIdentityAndAuthentication(configuration, environment, logger);
             return serviceCollection;
         }
         static IServiceCollection AddDatabase(this IServiceCollection serviceCollection,
@@ -134,6 +135,12 @@ namespace Documentify.Infrastructure
             serviceCollection.AddScoped<IAuthService, AuthService>();
             serviceCollection.AddScoped<ITokenGenerator, JwtTokenGenerator>();
             return serviceCollection;
+        }
+
+        static IServiceCollection AddHostedServices(this IServiceCollection services)
+        {
+            services.AddHostedService<RevokedRefreshTokensCleanup>();
+            return services;
         }
     }
 }
