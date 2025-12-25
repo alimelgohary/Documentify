@@ -5,11 +5,12 @@ using MediatR;
 
 namespace Documentify.ApplicationCore.Features.Auth.ExternalAuth
 {
-    public class ExternalLoginCommandHandler(IExternalAuthService externalAuthService) : IRequestHandler<ExternalLoginCommand, ExternalLoginCommandResponse>
+    public class ExternalLoginCommandHandler(IExternalAuthService externalAuthService) : IRequestHandler<ExternalLoginCommand, Result<ExternalLoginCommandResponse>>
     {
-        public async Task<ExternalLoginCommandResponse> Handle(ExternalLoginCommand request, CancellationToken cancellationToken)
+        public async Task<Result<ExternalLoginCommandResponse>> Handle(ExternalLoginCommand request, CancellationToken cancellationToken)
         {
-            return await externalAuthService.LoginOrRegister(ExternalLoginProvider.Google);
+            return Result<ExternalLoginCommandResponse>
+                    .Success(await externalAuthService.LoginOrRegister(ExternalLoginProvider.Google));
         }
     }
 }

@@ -2,5 +2,5 @@
 using MediatR;
 namespace Documentify.ApplicationCore.Features.Auth.ExternalAuth
 {
-    public record ExternalLoginCommand() : IRequest<ExternalLoginCommandResponse>;
+    public record ExternalLoginCommand() : IRequest<Result<ExternalLoginCommandResponse>>;
 }

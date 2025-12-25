@@ -1,11 +1,12 @@
-﻿using Documentify.ApplicationCore.Features.Auth.Login;
-using Documentify.ApplicationCore.Features.Auth.Register;
-using Documentify.ApplicationCore.Features.Auth.RefreshToken;
+﻿using Documentify.ApplicationCore.Features;
 using Documentify.ApplicationCore.Features.Auth.ExternalAuth;
+using Documentify.ApplicationCore.Features.Auth.Login;
+using Documentify.ApplicationCore.Features.Auth.RefreshToken;
+using Documentify.ApplicationCore.Features.Auth.Register;
+using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MediatR;
 
 namespace Documentify.Controllers
 {
@@ -29,7 +30,7 @@ namespace Documentify.Controllers
 
         [AllowAnonymous]
         [HttpGet("GoogleResponse")]
-        public async Task<IActionResult> GoogleResponse() 
+        public async Task<ActionResult<Result<ExternalLoginCommandResponse>>> GoogleResponse() 
             => Ok(await _sender.Send(new ExternalLoginCommand()));
 
         [HttpPost("Register")]
@@ -44,5 +45,9 @@ namespace Documentify.Controllers
         public async Task<ActionResult<RefreshTokenResponse>> RefreshToken(RefreshTokenCommand refreshTokenCommand)
             => Ok(await _sender.Send(refreshTokenCommand));
 
+
+        //[HttpPost(nameof(ConfirmEmail))]
+        //public async Task<ActionResult<ConfirmEmailResponse>> ConfirmEmail([FromQuery] ConfirmEmailCommand confirmEmailCommand)
+        //    => Ok(await _sender.Send(confirmEmailCommand));
     }
 }
