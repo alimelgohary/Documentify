@@ -1,14 +1,20 @@
 ﻿using Documentify.ApplicationCore;
 using Documentify.Domain.Enums;
+using Documentify.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 
 namespace Documentify.Infrastructure
 {
-    public class SeedDatabase(RoleManager<IdentityRole> _roleManager) : ISeedDatabase
+    public class SeedDatabase(RoleManager<IdentityRole> _roleManager,
+        IHostEnvironment env,
+        AppDbContext _context) : ISeedDatabase
     {
         public async Task Seed()
         {
+            if(env.EnvironmentName == "Testing")
+                await _context.Database.EnsureCreatedAsync();
             await SeedRoles();
         }
         async Task SeedRoles()
