@@ -1,4 +1,5 @@
-﻿using Documentify.ApplicationCore.Features.Categories.Add;
+﻿using Documentify.ApplicationCore.Features.Categories;
+using Documentify.ApplicationCore.Features.Categories.Add;
 using Documentify.ApplicationCore.Features.Categories.GetAll;
 using Documentify.ApplicationCore.Features.Categories.GetById;
 using MediatR;
@@ -12,7 +13,7 @@ namespace Documentify.Api.Controllers
     public class CategoriesController(IMediator _mediator) : ControllerBase
     {
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id, CancellationToken ct) 
+        public async Task<ActionResult<CategoryDto>> GetById(Guid id, CancellationToken ct) 
             => Ok(await _mediator.Send(new GetCategoryByIdQuery(id), ct)); 
 
         [HttpGet]

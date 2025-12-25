@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using MediatR;
-using Documentify.ApplicationCore.Features.Auth.Login;
+﻿using Documentify.ApplicationCore.Features.Auth.Login;
 using Documentify.ApplicationCore.Features.Auth.Register;
 using Documentify.ApplicationCore.Features.Auth.RefreshToken;
 using Documentify.ApplicationCore.Features.Auth.ExternalAuth;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using MediatR;
 
 namespace Documentify.Controllers
 {
@@ -33,15 +33,15 @@ namespace Documentify.Controllers
             => Ok(await _sender.Send(new ExternalLoginCommand()));
 
         [HttpPost("Register")]
-        public async Task<IActionResult> Register(RegisterCommand command) 
+        public async Task<ActionResult<RegisterCommandResponse>> Register(RegisterCommand command) 
             => Ok(await _sender.Send(command));
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login(LoginCommand command) 
+        public async Task<ActionResult<LoginCommandResponse>> Login(LoginCommand command) 
             => Ok(await _sender.Send(command));
 
         [HttpPost("RefreshToken")]
-        public async Task<IActionResult> RefreshToken(RefreshTokenCommand refreshTokenCommand)
+        public async Task<ActionResult<RefreshTokenResponse>> RefreshToken(RefreshTokenCommand refreshTokenCommand)
             => Ok(await _sender.Send(refreshTokenCommand));
 
     }
