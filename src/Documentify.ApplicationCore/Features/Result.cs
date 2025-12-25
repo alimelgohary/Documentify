@@ -3,34 +3,34 @@
     public class Result
     {
         public bool IsSuccess { get; }
-        public string Message { get; }
+        public string? Message { get; }
         public Dictionary<string, string[]>? Errors { get; }
 
-        protected Result(bool success, string message, Dictionary<string, string[]>? errors = null)
+        protected Result(bool success, string? message = default, Dictionary<string, string[]>? errors = default)
         {
             IsSuccess = success;
             Message = message;
             Errors = errors ?? new();
         }
 
-        public static Result Success(string message = "")
+        public static Result Success(string? message = default)
             => new(true, message);
 
-        public static Result Failure(string message, Dictionary<string, string[]>? errors = null)
+        public static Result Failure(string? message = default, Dictionary<string, string[]>? errors = default)
             => new(false, message, errors);
     }
     public class Result<T> : Result
     {
-        public T? Value { get; }
+        public T? Data { get; }
 
-        private Result(bool success, T? value, string message, Dictionary<string, string[]>? errors)
+        private Result(bool success, T? data, string? message = default, Dictionary<string, string[]>? errors = default)
             : base(success, message, errors)
-            => Value = value;
+            => Data = data;
 
-        public static Result<T> Success(T value, string message = "")
-            => new(true, value, message, null);
+        public static Result<T> Success(T data, string? message = default)
+            => new(true, data, message, default);
 
-        public static new Result<T> Failure(string message, Dictionary<string, string[]>? errors = null)
+        public static new Result<T> Failure(string? message = default, Dictionary<string, string[]>? errors = default)
             => new(false, default, message, errors);
     }
 
