@@ -54,32 +54,18 @@ namespace Documentify.IntegrationTests.ControllersTests
         {
             string testUsername2 = "testuser2";
             string testEmail2 = "user2@gmail.com";
-            var registerResult = await _client.PostAsJsonAsync<RegisterCommand>(pathRegister, new
-                (
-                    Username: testUsername2,
-                    Email: testEmail2,
-                    Password: testPassword
-                ));
-
-            if (!registerResult.IsSuccessStatusCode)
-                Assert.Fail($"User registration failed during login test setup. {registerResult.StatusCode}, {await registerResult.Content.ReadAsStringAsync()}");
-
-            using var scope = _factory.Services.CreateScope();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            var user = await userManager.FindByEmailAsync(testEmail2);
-            string token = await userManager.GenerateEmailConfirmationTokenAsync(user!);
-            var result = await userManager.ConfirmEmailAsync(user!, token);
-            if (!result.Succeeded)
-                Assert.Fail("Email confirmation failed during login test setup." + string.Join(",", result.Errors.Select(x => x.Description)));
+            await RegisterConfirmLoginUserAsync(testUsername2, testEmail2);
 
             var loginResult = await _client.PostAsJsonAsync<LoginCommand>(pathLogin, new
             (
                 UsernameOrEmail: testUsername2,
                 Password: testPassword
             ));
-            string res = await loginResult.Content.ReadAsStringAsync();
             if (loginResult.StatusCode != HttpStatusCode.OK)
+            {
+                string res = await loginResult.Content.ReadAsStringAsync();
                 Assert.Fail($"Test failed, statusCode: {loginResult.StatusCode}, {res}");
+            }
         }
 
 
