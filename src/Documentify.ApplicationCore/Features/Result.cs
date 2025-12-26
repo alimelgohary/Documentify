@@ -2,36 +2,46 @@
 {
     public class Result
     {
-        public bool IsSuccess { get; }
-        public string? Message { get; }
-        public Dictionary<string, string[]>? Errors { get; }
-
-        protected Result(bool success, string? message = default, Dictionary<string, string[]>? errors = default)
-        {
-            IsSuccess = success;
-            Message = message;
-            Errors = errors ?? new();
-        }
+        public bool IsSuccess { get; set; }
+        public string? Message { get; set; }
+        public Dictionary<string, string[]>? Errors { get; set; }
 
         public static Result Success(string? message = default)
-            => new(true, message);
+            => new()
+            {
+                IsSuccess = true,
+                Message = message
+            };
 
         public static Result Failure(string? message = default, Dictionary<string, string[]>? errors = default)
-            => new(false, message, errors);
+            => new()
+            {
+                IsSuccess = false,
+                Message = message,
+                Errors = errors
+            };
     }
     public class Result<T> : Result
     {
-        public T? Data { get; }
-
-        private Result(bool success, T? data, string? message = default, Dictionary<string, string[]>? errors = default)
-            : base(success, message, errors)
-            => Data = data;
+        public T? Data { get; set; }
 
         public static Result<T> Success(T data, string? message = default)
-            => new(true, data, message, default);
+            => new()
+            {
+                IsSuccess = true,
+                Data = data,
+                Message = message,
+                Errors = default
+            };
 
         public static new Result<T> Failure(string? message = default, Dictionary<string, string[]>? errors = default)
-            => new(false, default, message, errors);
+            => new()
+            {
+                IsSuccess = false,
+                Data = default,
+                Message = message,
+                Errors = errors
+            };
     }
 
 }

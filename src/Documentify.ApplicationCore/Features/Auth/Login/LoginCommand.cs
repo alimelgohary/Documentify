@@ -2,5 +2,5 @@
 
 namespace Documentify.ApplicationCore.Features.Auth.Login
 {
-    public record LoginCommand(string UsernameOrEmail, string Password) : IRequest<LoginCommandResponse>;
+    public record LoginCommand(string UsernameOrEmail, string Password) : IRequest<Result<LoginCommandResponse>>;
 }

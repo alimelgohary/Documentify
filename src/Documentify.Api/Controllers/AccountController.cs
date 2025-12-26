@@ -34,15 +34,15 @@ namespace Documentify.Controllers
             => Ok(await _sender.Send(new ExternalLoginCommand()));
 
         [HttpPost("Register")]
-        public async Task<ActionResult<RegisterCommandResponse>> Register(RegisterCommand command) 
+        public async Task<ActionResult<Result<RegisterCommandResponse>>> Register(RegisterCommand command) 
             => Ok(await _sender.Send(command));
 
         [HttpPost("Login")]
-        public async Task<ActionResult<LoginCommandResponse>> Login(LoginCommand command) 
+        public async Task<ActionResult<Result<LoginCommandResponse>>> Login(LoginCommand command) 
             => Ok(await _sender.Send(command));
 
         [HttpPost("RefreshToken")]
-        public async Task<ActionResult<RefreshTokenResponse>> RefreshToken(RefreshTokenCommand refreshTokenCommand)
+        public async Task<ActionResult<Result<RefreshTokenResponse>>> RefreshToken(RefreshTokenCommand refreshTokenCommand)
             => Ok(await _sender.Send(refreshTokenCommand));
 
 

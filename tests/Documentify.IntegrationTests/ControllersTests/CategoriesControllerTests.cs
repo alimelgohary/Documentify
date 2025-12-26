@@ -1,4 +1,5 @@
-﻿using Documentify.ApplicationCore.Features.Categories;
+﻿using Documentify.ApplicationCore.Features;
+using Documentify.ApplicationCore.Features.Categories;
 using Documentify.ApplicationCore.Features.Categories.Add;
 using Documentify.ApplicationCore.Features.Categories.GetAll;
 using Documentify.Infrastructure.Data;
@@ -26,12 +27,12 @@ namespace Documentify.IntegrationTests.ControllersTests
             var id = await PostCategory(name);
 
             var getResponse = await _client.GetAsync($"{path}/{id}");
-            var category = await getResponse.Content.ReadFromJsonAsync<CategoryDto>();
+            var res = await getResponse.Content.ReadFromJsonAsync<Result<CategoryDto>>();
 
             Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
-            Assert.NotNull(category);
-            Assert.Equal(id, category!.Id);
-            Assert.Equal(name, category.Name);
+            Assert.NotNull(res);
+            Assert.Equal(id, res.Data!.Id);
+            Assert.Equal(name, res.Data.Name);
         }
 
         [Fact]
@@ -45,8 +46,13 @@ namespace Documentify.IntegrationTests.ControllersTests
         {
             AddCategoryCommand newCategory = new(name);
             var response = await _client.PostAsJsonAsync(path, newCategory);
-            var createdResponse = await response.Content.ReadFromJsonAsync<AddCategoryResponse>();
-            return createdResponse!.categoryId;
+            var createdResponse = await response.Content.ReadFromJsonAsync<Result<AddCategoryResponse>>();
+            if (createdResponse is null)
+            {
+                string res = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Problem in PostCategory method, deserialize failed: {res}");
+            }
+            return createdResponse!.Data!.categoryId;
         }
 
         [Fact]
@@ -62,11 +68,11 @@ namespace Documentify.IntegrationTests.ControllersTests
             string name = "New Category for testing";
             await PostCategory(name);
 
-            var response = await _client.GetFromJsonAsync<GetAllCategoriesResponse>(path);
+            var response = await _client.GetFromJsonAsync<Result<GetAllCategoriesResponse>>(path);
             Assert.NotNull(response);
-            Assert.NotEmpty(response.items);
-            Assert.Equal(response.count, response.items.Count);
-            Assert.Contains(response.items, c => c.Name == name);
+            Assert.NotEmpty(response.Data!.items);
+            Assert.Equal(response.Data.count, response.Data.items.Count);
+            Assert.Contains(response.Data.items, c => c.Name == name);
         }
 
         [Fact]
@@ -92,15 +98,15 @@ namespace Documentify.IntegrationTests.ControllersTests
             try
             {
                 var response = await _client.PostAsJsonAsync(path, newCategory);
-                var createdResponse = await response.Content.ReadFromJsonAsync<AddCategoryResponse>();
+                var createdResponse = await response.Content.ReadFromJsonAsync<Result<AddCategoryResponse>>();
 
-                Assert.NotNull(createdResponse);
-                Assert.NotEqual(Guid.Empty, createdResponse!.categoryId);
+                Assert.NotNull(createdResponse!.Data);
+                Assert.NotEqual(Guid.Empty, createdResponse!.Data.categoryId);
 
                 using var scope = _factory.Services.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-                Assert.True(db.Categories.Any(p => p.Id == createdResponse.categoryId && p.Name == name));
+                Assert.True(db.Categories.Any(p => p.Id == createdResponse.Data.categoryId && p.Name == name));
             }
             catch (Exception ex)
             {

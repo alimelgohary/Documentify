@@ -1,4 +1,5 @@
-﻿using Documentify.ApplicationCore.Features.Auth.Login;
+﻿using Documentify.ApplicationCore.Features;
+using Documentify.ApplicationCore.Features.Auth.Login;
 using Documentify.ApplicationCore.Features.Auth.RefreshToken;
 using Documentify.ApplicationCore.Features.Auth.Register;
 using Documentify.ApplicationCore.Features.Categories.Add;
@@ -106,7 +107,7 @@ namespace Documentify.IntegrationTests.ControllersTests
         {
             string testUsername3 = "testuser3";
             string testEmail3 = "user3@gmail.com";
-            string res = await RegisterConfirmLoginUserAsync(testUsername3, testEmail3);
+            LoginCommandResponse res = await RegisterConfirmLoginUserAsync(testUsername3, testEmail3);
 
             AddCategoryCommand newCategory = new("New category");
 
@@ -114,17 +115,16 @@ namespace Documentify.IntegrationTests.ControllersTests
             {
                 Content = JsonContent.Create(newCategory)
             };
-            string? accessToken;
-            accessToken = JsonDocument.Parse(res).RootElement.GetProperty(nameof(accessToken)).GetString();
-            if (accessToken is null)
-                Assert.Fail($"Login endpoint did not return access token (Looked for key: {nameof(accessToken)})");
+            string accessToken = res.AccessToken;
+            if (string.IsNullOrEmpty(accessToken))
+                Assert.Fail($"Login endpoint did not return access token");
             request.Headers.Add("Authorization", "Bearer " + accessToken);
             var postResult = await _client.SendAsync(request);
             if (!postResult.IsSuccessStatusCode)
                 Assert.Fail($"Authorized request failed: {postResult.StatusCode}, {await postResult.Content.ReadAsStringAsync()}");
         }
 
-        private async Task<string> RegisterConfirmLoginUserAsync(string testUsername, string testEmail)
+        private async Task<LoginCommandResponse> RegisterConfirmLoginUserAsync(string testUsername, string testEmail)
         {
             var registerResult = await _client.PostAsJsonAsync<RegisterCommand>(pathRegister, new
                 (
@@ -149,10 +149,19 @@ namespace Documentify.IntegrationTests.ControllersTests
                 UsernameOrEmail: testUsername,
                 Password: testPassword
             ));
-            string res = await loginResult.Content.ReadAsStringAsync();
-            if (loginResult.StatusCode != HttpStatusCode.OK)
+
+            if (loginResult.StatusCode != HttpStatusCode.OK) {
+
+                string res = await loginResult.Content.ReadAsStringAsync();
                 throw new Exception($"Login failed during test setup, statusCode: {loginResult.StatusCode}, {res}");
-            return res;
+            }
+            var resLoginResponse = await loginResult.Content.ReadFromJsonAsync<Result<LoginCommandResponse>>();
+            if (resLoginResponse is null)
+            {
+                string res = await loginResult.Content.ReadAsStringAsync();
+                throw new Exception($"Login response deserialization failed during test setup, statusCode: {loginResult.StatusCode}, {res}");
+            }
+            return resLoginResponse.Data!;
         }
 
         [Fact]
@@ -160,12 +169,11 @@ namespace Documentify.IntegrationTests.ControllersTests
         {
             string testUsername4 = "testuser4";
             string testEmail4 = "user4@gmail.com";
-            string res = await RegisterConfirmLoginUserAsync(testUsername4, testEmail4);
+            LoginCommandResponse res = await RegisterConfirmLoginUserAsync(testUsername4, testEmail4);
 
-            string? refreshToken;
-            refreshToken = JsonDocument.Parse(res).RootElement.GetProperty(nameof(refreshToken)).GetString();
-            if (refreshToken is null)
-                Assert.Fail($"Login endpoint did not return a refresh token (Looked for key: {nameof(refreshToken)}");
+            string refreshToken = res.RefreshToken;
+            if (string.IsNullOrEmpty(refreshToken))
+                Assert.Fail($"Login endpoint did not return a refresh token");
 
             var httpResult = await _client.PostAsJsonAsync<RefreshTokenCommand>(pathRefresh, new(refreshToken));
             var stringResult = await httpResult.Content.ReadAsStringAsync();
@@ -173,20 +181,20 @@ namespace Documentify.IntegrationTests.ControllersTests
             if (!httpResult.IsSuccessStatusCode)
                 Assert.Fail($"Endpoint response not success: {httpResult.StatusCode}, result: {stringResult}");
 
-            var objectResult = await httpResult.Content.ReadFromJsonAsync<RefreshTokenResponse>();
+            var objectResult = await httpResult.Content.ReadFromJsonAsync<Result<RefreshTokenResponse>>();
             if (objectResult is null)
                 Assert.Fail($"Couldn't deserialize response object, result: {stringResult}");
 
-            if (string.IsNullOrWhiteSpace(objectResult.AccessToken))
+            if (string.IsNullOrWhiteSpace(objectResult.Data!.AccessToken))
                 Assert.Fail($"No access token: {stringResult}");
 
-            if (string.IsNullOrWhiteSpace(objectResult.RefreshToken))
+            if (string.IsNullOrWhiteSpace(objectResult.Data.RefreshToken))
                 Assert.Fail($"No refresh token: {stringResult}");
 
-            if (objectResult.AccessTokenExpiry == default)
+            if (objectResult.Data.AccessTokenExpiry == default)
                 Assert.Fail($"No access token expiry: {stringResult}");
 
-            if (objectResult.RefreshTokenExpiry == default)
+            if (objectResult.Data.RefreshTokenExpiry == default)
                 Assert.Fail($"No refresh token expiry: {stringResult}");
         }
 
@@ -195,12 +203,11 @@ namespace Documentify.IntegrationTests.ControllersTests
         {
             string testUsername5 = "testuser5";
             string testEmail5 = "user5@gmail.com";
-            string res = await RegisterConfirmLoginUserAsync(testUsername5, testEmail5);
+            LoginCommandResponse res = await RegisterConfirmLoginUserAsync(testUsername5, testEmail5);
 
-            string? refreshToken;
-            refreshToken = JsonDocument.Parse(res).RootElement.GetProperty(nameof(refreshToken)).GetString();
-            if (refreshToken is null)
-                Assert.Fail($"Login endpoint did not return a refresh token (Looked for key: {nameof(refreshToken)}");
+            string refreshToken = res.RefreshToken;
+            if (string.IsNullOrEmpty(refreshToken))
+                Assert.Fail($"Login endpoint did not return a refresh token");
 
             var httpResult = await _client.PostAsJsonAsync<RefreshTokenCommand>(pathRefresh, new(refreshToken));
             var httpResult2 = await _client.PostAsJsonAsync<RefreshTokenCommand>(pathRefresh, new(refreshToken));
@@ -278,7 +285,7 @@ namespace Documentify.IntegrationTests.ControllersTests
             var scope = _factory.Services.CreateScope();
             var _conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_conf[ConfigurationKeys.JwtRefreshSecret]!));
-           
+
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var claims = new[]
             {

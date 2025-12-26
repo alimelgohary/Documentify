@@ -4,15 +4,16 @@ using MediatR;
 
 namespace Documentify.ApplicationCore.Features.Categories.GetAll
 {
-    public class GetAllCategoriesQueryHandler(IUnitOfWork _unitOfWork) : IRequestHandler<GetAllCategoriesQuery, GetAllCategoriesResponse>
+    public class GetAllCategoriesQueryHandler(IUnitOfWork _unitOfWork) : IRequestHandler<GetAllCategoriesQuery, Result<GetAllCategoriesResponse>>
     {
-        public async Task<GetAllCategoriesResponse> Handle(GetAllCategoriesQuery request, CancellationToken ct)
+        public async Task<Result<GetAllCategoriesResponse>> Handle(GetAllCategoriesQuery request, CancellationToken ct)
         {
             var categories = await _unitOfWork
                 .Repository<Category, Guid>()
                 .ListAsync(new GetAllCategoriesSpec(), ct);
             var items = categories.Select(x => new CategoryDto(x.Id, x.Name)).ToList();
-            return new GetAllCategoriesResponse(items, items.Count);
+            return Result < GetAllCategoriesResponse >.Success(
+                new GetAllCategoriesResponse(items, items.Count));
         }
     }
 }

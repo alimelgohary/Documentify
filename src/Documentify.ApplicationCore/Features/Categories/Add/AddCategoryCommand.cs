@@ -7,5 +7,5 @@ using System.Threading.Tasks;
 
 namespace Documentify.ApplicationCore.Features.Categories.Add
 {
-    public record AddCategoryCommand(string categoryName) : IRequest<AddCategoryResponse>;
+    public record AddCategoryCommand(string categoryName) : IRequest<Result<AddCategoryResponse>>;
 }

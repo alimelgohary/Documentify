@@ -10,7 +10,7 @@ try
     Log.Logger = new LoggerConfiguration()
         .ReadFrom.Configuration(builder.Configuration)
         .CreateLogger();
-    Log.Information("Starting web application");
+    Log.Information("=========== Starting web application ===========");
     var appLogger = new SerilogLoggerFactory(Log.Logger).CreateLogger<Program>();
     
     builder.Services.AddApiServices(builder.Configuration, builder.Environment, appLogger);

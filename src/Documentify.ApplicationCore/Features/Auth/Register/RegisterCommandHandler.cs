@@ -4,11 +4,12 @@ using MediatR;
 
 namespace Documentify.ApplicationCore.Features.Auth.Register
 {
-    public class RegisterCommandHandler(IAuthService _authService) : IRequestHandler<RegisterCommand, RegisterCommandResponse>
+    public class RegisterCommandHandler(IAuthService _authService) : IRequestHandler<RegisterCommand, Result<RegisterCommandResponse>>
     {
-        public async Task<RegisterCommandResponse> Handle(RegisterCommand request, CancellationToken cancellationToken)
+        public async Task<Result<RegisterCommandResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
-            return await _authService.RegisterAsync(request.Username, request.Email, request.Password, [Role.User]);
+            return Result<RegisterCommandResponse>.Success(
+                await _authService.RegisterAsync(request.Username, request.Email, request.Password, [Role.User]));
         }
     }
 }

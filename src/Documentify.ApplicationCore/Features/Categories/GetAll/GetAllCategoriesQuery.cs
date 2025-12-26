@@ -2,5 +2,5 @@
 
 namespace Documentify.ApplicationCore.Features.Categories.GetAll
 {
-    public record GetAllCategoriesQuery() : IRequest<GetAllCategoriesResponse>;
+    public record GetAllCategoriesQuery() : IRequest<Result<GetAllCategoriesResponse>>;
 }

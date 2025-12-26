@@ -2,5 +2,5 @@
 
 namespace Documentify.ApplicationCore.Features.Auth.Register
 {
-    public record RegisterCommand(string Username, string Email, string Password) : IRequest<RegisterCommandResponse>;
+    public record RegisterCommand(string Username, string Email, string Password) : IRequest<Result<RegisterCommandResponse>>;
 }
