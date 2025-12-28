@@ -7,8 +7,7 @@ namespace Documentify.Infrastructure.Mail
     {
         public Task<bool> SendConfirmMail(string subject, string to, string link, string? from = null)
         {
-            string token = string.Empty;    
-            _logger.LogInformation("Your link is: {token}", token);
+            _logger.LogInformation("Your link is: {token}", link);
             return Task.FromResult(true);
         }
     }

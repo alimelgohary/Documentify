@@ -154,10 +154,10 @@ namespace Documentify.Infrastructure
 
         static IServiceCollection AddMailServices(this IServiceCollection services, IHostEnvironment env)
         {
-            if (env.IsDevelopment())
-                services.AddScoped<IMailService, DummyMailService>();
-            else
+            if (env.IsProduction())
                 services.AddScoped<IMailService, GmailSmtpService>();
+            else
+                services.AddScoped<IMailService, DummyMailService>();
             return services;
         }
     }
