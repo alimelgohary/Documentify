@@ -1,7 +1,4 @@
 ﻿namespace Documentify.ApplicationCore.Features.Auth.ConfirmEmail
 {
-    public record ConfirmEmailResponse
-    {
-        
-    }
+    public record ConfirmEmailResponse(string Message);
 }

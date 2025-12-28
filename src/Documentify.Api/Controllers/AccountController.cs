@@ -1,4 +1,5 @@
 ﻿using Documentify.ApplicationCore.Features;
+using Documentify.ApplicationCore.Features.Auth.ConfirmEmail;
 using Documentify.ApplicationCore.Features.Auth.ExternalAuth;
 using Documentify.ApplicationCore.Features.Auth.Login;
 using Documentify.ApplicationCore.Features.Auth.RefreshToken;
@@ -46,8 +47,8 @@ namespace Documentify.Controllers
             => Ok(await _sender.Send(refreshTokenCommand));
 
 
-        //[HttpPost(nameof(ConfirmEmail))]
-        //public async Task<ActionResult<ConfirmEmailResponse>> ConfirmEmail([FromQuery] ConfirmEmailCommand confirmEmailCommand)
-        //    => Ok(await _sender.Send(confirmEmailCommand));
+        [HttpGet(nameof(ConfirmEmail))]
+        public async Task<ActionResult<ConfirmEmailResponse>> ConfirmEmail([FromQuery] ConfirmEmailCommand confirmEmailCommand)
+            => Ok(await _sender.Send(confirmEmailCommand));
     }
 }

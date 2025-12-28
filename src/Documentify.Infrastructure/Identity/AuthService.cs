@@ -1,8 +1,10 @@
 ﻿using Documentify.ApplicationCore.Common.Exceptions;
 using Documentify.ApplicationCore.Common.Interfaces;
+using Documentify.ApplicationCore.Features.Auth.ConfirmEmail;
 using Documentify.ApplicationCore.Features.Auth.Login;
 using Documentify.ApplicationCore.Features.Auth.RefreshToken;
 using Documentify.ApplicationCore.Features.Auth.Register;
+using Documentify.ApplicationCore.Mail;
 using Documentify.ApplicationCore.Repository;
 using Documentify.Domain.Enums;
 using Documentify.Infrastructure.Data;
@@ -13,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text.Encodings.Web;
 using static Documentify.Infrastructure.InfrastructureServiceExtensions;
 
 namespace Documentify.Infrastructure.Identity
@@ -23,7 +26,8 @@ namespace Documentify.Infrastructure.Identity
                             ITokenGenerator _tokenGenerator,
                             IConfiguration _configuration,
                             ILogger<IAuthService> _logger,
-                            IUnitOfWork unitOfWork) : IAuthService
+                            IUnitOfWork unitOfWork,
+                            IMailService mailService) : IAuthService
     {
         public async Task<LoginCommandResponse> LoginAsync(string usernameOrEmail, string password)
         {
@@ -84,6 +88,8 @@ namespace Documentify.Infrastructure.Identity
                 throw new BadRequestException("User registration failed duo to unknown error");
             }
             await transaction.CommitAsync();
+            var link = await GenerateConfirmationLink(user);
+            await mailService.SendConfirmMail("Documentify Email Confirmation", email, link, null);
             return new("Successful registration, please check your email address");
         }
 
@@ -131,5 +137,27 @@ namespace Documentify.Infrastructure.Identity
             );
         }
 
+        public async Task<ConfirmEmailResponse> ConfirmEmailAsync(string token, string email, CancellationToken ct = default)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is null)
+                throw new BadRequestException("Invalid email confirmation request.");
+
+            var res = await _userManager.ConfirmEmailAsync(user, token);
+            if (!res.Succeeded)
+            {
+                var errors = string.Join(",", res.Errors.Select(e => e.Description));
+                throw new BadRequestException("Email confirmation failed: " + errors);
+            }
+            return new ConfirmEmailResponse(Message: "Email confirmed successfully.");
+        }
+        async Task<string> GenerateConfirmationLink(ApplicationUser user)
+        {
+            string token = await _userManager.GenerateEmailConfirmationTokenAsync(user!);
+            var baseUrl = _configuration["ASPNETCORE_URLS"]!.Split(";").First();
+            var userMail = UrlEncoder.Default.Encode(user.Email!);
+            token = UrlEncoder.Default.Encode(token);
+            return $"{baseUrl}/Account/ConfirmEmail?token={token}&email={userMail}";
+        }
     }
 }

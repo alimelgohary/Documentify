@@ -1,10 +1,12 @@
 ﻿using Documentify.ApplicationCore;
 using Documentify.ApplicationCore.Common.Interfaces;
+using Documentify.ApplicationCore.Mail;
 using Documentify.ApplicationCore.Repository;
 using Documentify.Infrastructure.BackgroundTasks;
 using Documentify.Infrastructure.Data;
 using Documentify.Infrastructure.Identity;
 using Documentify.Infrastructure.Identity.Entities;
+using Documentify.Infrastructure.Mail;
 using Documentify.Infrastructure.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -26,10 +28,16 @@ namespace Documentify.Infrastructure
             public const string JwtIssuer = "Jwt:Issuer";
             public const string JwtExpiryMinutes = "Jwt:ExpiryMinutes";
             public const string JwtRefreshExpiryMinutes = "Jwt:RefreshExpiryMinutes";
+
             public const string GoogleClientId = "Authentication:Google:ClientId";
             public const string GoogleClientSecret = "Authentication:Google:ClientSecret";
+
             public const string DocumentifyConnectionString = "connectionStrings:DocumentifyConnection";
+
             public const string MaxRequestTimeWarningThreshold = "MaxRequestTimeWarningThreshold";
+
+            public const string GmailUser = "gmail_user";
+            public const string GmailPass = "gmail_password";
         }
         static void ValidateConfiguration(IConfiguration configuration, ILogger logger)
         {
@@ -63,8 +71,9 @@ namespace Documentify.Infrastructure
             serviceCollection.AddDatabase(configuration, environment, logger)
                              .AddUow(logger)
                              .AddIdentityAndAuthentication(configuration, environment, logger)
-                             .AddHostedServices();
-
+                             .AddHostedServices()
+                             .AddMailServices(environment)
+                             .AddMemoryCache();
             return serviceCollection;
         }
         static IServiceCollection AddDatabase(this IServiceCollection serviceCollection,
@@ -140,6 +149,15 @@ namespace Documentify.Infrastructure
         static IServiceCollection AddHostedServices(this IServiceCollection services)
         {
             services.AddHostedService<RevokedRefreshTokensCleanup>();
+            return services;
+        }
+
+        static IServiceCollection AddMailServices(this IServiceCollection services, IHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+                services.AddScoped<IMailService, DummyMailService>();
+            else
+                services.AddScoped<IMailService, GmailSmtpService>();
             return services;
         }
     }

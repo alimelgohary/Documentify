@@ -7,6 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Mail\Templates\email-confirm.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Mail\Templates\email-confirm.html">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
 	<PackageReference Include="Ardalis.Specification" Version="9.3.1" />
 	<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
 	<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.22" />
