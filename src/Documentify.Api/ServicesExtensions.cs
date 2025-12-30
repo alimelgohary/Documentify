@@ -39,6 +39,7 @@ namespace Documentify.Api
         {
             services.AddMediatR(
                 cfg => cfg.RegisterServicesFromAssemblyContaining<IApplicationCoreMarker>());
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             return services;
         }
