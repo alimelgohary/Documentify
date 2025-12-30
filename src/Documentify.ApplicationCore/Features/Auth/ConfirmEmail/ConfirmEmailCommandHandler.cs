@@ -7,8 +7,7 @@ namespace Documentify.ApplicationCore.Features.Auth.ConfirmEmail
     {
         public async Task<Result<ConfirmEmailResponse>> Handle(ConfirmEmailCommand request, CancellationToken cancellationToken)
         {
-            return Result<ConfirmEmailResponse>
-                .Success(await _authService.ConfirmEmailAsync(request.Token, request.Email, cancellationToken));
+            return await _authService.ConfirmEmailAsync(request.Token, request.Email, cancellationToken);
         }
     }
 }

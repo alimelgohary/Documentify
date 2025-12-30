@@ -1,5 +1,5 @@
-﻿using Documentify.ApplicationCore.Common.Exceptions;
-using Documentify.ApplicationCore.Common.Interfaces;
+﻿using Documentify.ApplicationCore.Common.Interfaces;
+using Documentify.ApplicationCore.Features;
 using Documentify.ApplicationCore.Features.Auth.ConfirmEmail;
 using Documentify.ApplicationCore.Features.Auth.Login;
 using Documentify.ApplicationCore.Features.Auth.RefreshToken;
@@ -29,7 +29,7 @@ namespace Documentify.Infrastructure.Identity
                             IUnitOfWork unitOfWork,
                             IMailService mailService) : IAuthService
     {
-        public async Task<LoginCommandResponse> LoginAsync(string usernameOrEmail, string password)
+        public async Task<Result<LoginCommandResponse>> LoginAsync(string usernameOrEmail, string password)
         {
             var normalizedEmail = _userManager.NormalizeEmail(usernameOrEmail);
             var normalizedName = _userManager.NormalizeName(usernameOrEmail);
@@ -39,14 +39,14 @@ namespace Documentify.Infrastructure.Identity
                                                    || u.NormalizedUserName == normalizedName);
 
             if (user is null)
-                throw new BadRequestException("Invalid credentials.");
+                return ResultFactory.Failure<LoginCommandResponse>(ErrorType.BadInput, "Invalid credentials.");
 
             var signInResult = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: true);
             if (signInResult.Succeeded == false)
-                throw new BadRequestException("Invalid credentials.");
+                return ResultFactory.Failure<LoginCommandResponse>(ErrorType.BadInput, "Invalid credentials.");
 
             if (user.EmailConfirmed == false)
-                throw new BadRequestException("Email not confirmed.");
+                return ResultFactory.Failure<LoginCommandResponse>(ErrorType.BadInput, "Email not confirmed.");
 
             var roles = (await _userManager.GetRolesAsync(user))
                                 .Select(x => Enum.Parse<Role>(x))
@@ -54,15 +54,24 @@ namespace Documentify.Infrastructure.Identity
 
             var expiryMinutes = int.Parse(_configuration[ConfigurationKeys.JwtExpiryMinutes]!);
             var expiryMinutesRefresh = int.Parse(_configuration[ConfigurationKeys.JwtRefreshExpiryMinutes]!);
-            return new LoginCommandResponse
+            
+            var accessTokenRes = _tokenGenerator.GenerateToken(user.Id, user.Email, roles, JwtTokenType.Jwt);
+            if (accessTokenRes.IsSuccess == false)
+                return ResultFactory.Failure<LoginCommandResponse>(accessTokenRes.ErrorType, accessTokenRes.Message);
+            
+            var refreshTokenRes = _tokenGenerator.GenerateToken(user.Id, user.Email, roles, JwtTokenType.Refresh);
+            if (refreshTokenRes.IsSuccess == false)
+                return ResultFactory.Failure<LoginCommandResponse>(refreshTokenRes.ErrorType, refreshTokenRes.Message);
+            
+            return ResultFactory.Success(new LoginCommandResponse
             (
-                AccessToken: _tokenGenerator.GenerateToken(user.Id, user.Email, roles, JwtTokenType.Jwt),
+                AccessToken: accessTokenRes.Data!,
                 AccessTokenExpiry: DateTime.UtcNow.AddMinutes(expiryMinutes),
-                RefreshToken: _tokenGenerator.GenerateToken(user.Id, user.Email, roles, JwtTokenType.Refresh),
+                RefreshToken: refreshTokenRes.Data!,
                 RefreshTokenExpiry: DateTime.UtcNow.AddMinutes(expiryMinutesRefresh)
-            );
+            ));
         }
-        public async Task<RegisterCommandResponse> RegisterAsync(string username, string email, string password, Role[] roles)
+        public async Task<Result<RegisterCommandResponse>> RegisterAsync(string username, string email, string password, Role[] roles)
         {
             var user = new ApplicationUser
             {
@@ -77,7 +86,7 @@ namespace Documentify.Infrastructure.Identity
                 transaction.Rollback();
                 var errors = string.Join(",", result.Errors.Select(e => e.Description));
                 _logger.LogWarning("User registration failed: {errors}", errors);
-                throw new BadRequestException("Registration failed: " + errors);
+                return ResultFactory.Failure<RegisterCommandResponse>(ErrorType.BadInput, "Registration failed: " + errors);
             }
 
             var roleRes = await _userManager.AddToRolesAsync(user, roles.Select(x => x.ToString()));
@@ -85,15 +94,15 @@ namespace Documentify.Infrastructure.Identity
             {
                 transaction.Rollback();
                 _logger.LogError(string.Join(",", roleRes.Errors.Select(x => x.Description)));
-                throw new BadRequestException("User registration failed duo to unknown error");
+                return ResultFactory.Failure<RegisterCommandResponse>(ErrorType.BadInput, "User registration failed duo to unknown error");
             }
             await transaction.CommitAsync();
             var link = await GenerateConfirmationLink(user);
             await mailService.SendConfirmMail("Documentify Email Confirmation", email, link, null);
-            return new("Successful registration, please check your email address");
+            return ResultFactory.Success(new RegisterCommandResponse("Successful registration, please check your email address"));
         }
 
-        public async Task<RefreshTokenResponse> RefreshTokenAsync(string oldRefreshToken, CancellationToken cancellationToken)
+        public async Task<Result<RefreshTokenResponse>> RefreshTokenAsync(string oldRefreshToken, CancellationToken cancellationToken)
         {
             _tokenGenerator.ValidateRefreshToken(oldRefreshToken);
 
@@ -101,7 +110,7 @@ namespace Documentify.Infrastructure.Identity
                                                     .ExistsAsync(x => x.Token == oldRefreshToken);
 
             if (IsRevoked)
-                throw new BadRequestException("Refresh token has been revoked.");
+                return ResultFactory.Failure<RefreshTokenResponse>(ErrorType.BadInput, "Refresh token has been revoked.");
 
             var token = new JwtSecurityTokenHandler().ReadJwtToken(oldRefreshToken);
             var oldRefreshTokenExpiry = token.ValidTo;
@@ -117,39 +126,46 @@ namespace Documentify.Infrastructure.Identity
 
             var expiryMinutes = int.Parse(_configuration[ConfigurationKeys.JwtExpiryMinutes]!);
             var expiryMinutesRefresh = int.Parse(_configuration[ConfigurationKeys.JwtRefreshExpiryMinutes]!);
-            
+
             string userId = token.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)!.Value;
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user is null)
-                throw new BadRequestException("User not found");
+                return ResultFactory.Failure<RefreshTokenResponse>(ErrorType.BadInput, "User not found");
 
             var roles = (await _userManager.GetRolesAsync(user))
                                 .Select(Enum.Parse<Role>)
                                 .ToArray();
-
-            return new RefreshTokenResponse
+            var accessTokenRes = _tokenGenerator.GenerateToken(user.Id, user.Email, roles, JwtTokenType.Jwt);
+            if (accessTokenRes.IsSuccess == false)
+                return ResultFactory.Failure<RefreshTokenResponse>(accessTokenRes.ErrorType, accessTokenRes.Message);
+            
+            var refreshTokenRes = _tokenGenerator.GenerateToken(user.Id, user.Email, roles, JwtTokenType.Refresh);
+            if (refreshTokenRes.IsSuccess == false)
+                return ResultFactory.Failure<RefreshTokenResponse>(refreshTokenRes.ErrorType, refreshTokenRes.Message);
+            
+            return ResultFactory.Success(new RefreshTokenResponse
             (
-                AccessToken: _tokenGenerator.GenerateToken(user.Id, user.Email, roles, JwtTokenType.Jwt),
+                AccessToken: accessTokenRes.Data!,
                 AccessTokenExpiry: DateTime.UtcNow.AddMinutes(expiryMinutes),
-                RefreshToken: _tokenGenerator.GenerateToken(user.Id, user.Email, roles, JwtTokenType.Refresh),
+                RefreshToken: refreshTokenRes.Data!,
                 RefreshTokenExpiry: DateTime.UtcNow.AddMinutes(expiryMinutesRefresh)
-            );
+            ));
         }
 
-        public async Task<ConfirmEmailResponse> ConfirmEmailAsync(string token, string email, CancellationToken ct = default)
+        public async Task<Result<ConfirmEmailResponse>> ConfirmEmailAsync(string token, string email, CancellationToken ct = default)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user is null)
-                throw new BadRequestException("Invalid email confirmation request.");
+                return ResultFactory.Failure<ConfirmEmailResponse>(ErrorType.BadInput, "Invalid email confirmation request.");
 
             var res = await _userManager.ConfirmEmailAsync(user, token);
             if (!res.Succeeded)
             {
                 var errors = string.Join(",", res.Errors.Select(e => e.Description));
-                throw new BadRequestException("Email confirmation failed: " + errors);
+                return ResultFactory.Failure<ConfirmEmailResponse>(ErrorType.BadInput, "Email confirmation failed: " + errors);
             }
-            return new ConfirmEmailResponse(Message: "Email confirmed successfully.");
+            return ResultFactory.Success(new ConfirmEmailResponse(Message: "Email confirmed successfully."));
         }
         async Task<string> GenerateConfirmationLink(ApplicationUser user)
         {

@@ -1,4 +1,5 @@
-﻿using Documentify.ApplicationCore.Features;
+﻿using Documentify.Api;
+using Documentify.ApplicationCore.Features;
 using Documentify.ApplicationCore.Features.Auth.ConfirmEmail;
 using Documentify.ApplicationCore.Features.Auth.ExternalAuth;
 using Documentify.ApplicationCore.Features.Auth.Login;
@@ -32,23 +33,23 @@ namespace Documentify.Controllers
         [AllowAnonymous]
         [HttpGet("GoogleResponse")]
         public async Task<ActionResult<Result<ExternalLoginCommandResponse>>> GoogleResponse() 
-            => Ok(await _sender.Send(new ExternalLoginCommand()));
+            => (await _sender.Send(new ExternalLoginCommand())).ToActionResult();
 
         [HttpPost("Register")]
         public async Task<ActionResult<Result<RegisterCommandResponse>>> Register(RegisterCommand command) 
-            => Ok(await _sender.Send(command));
+            => (await _sender.Send(command)).ToActionResult();
 
         [HttpPost("Login")]
         public async Task<ActionResult<Result<LoginCommandResponse>>> Login(LoginCommand command) 
-            => Ok(await _sender.Send(command));
+            => (await _sender.Send(command)).ToActionResult();
 
         [HttpPost("RefreshToken")]
         public async Task<ActionResult<Result<RefreshTokenResponse>>> RefreshToken(RefreshTokenCommand refreshTokenCommand)
-            => Ok(await _sender.Send(refreshTokenCommand));
+            => (await _sender.Send(refreshTokenCommand)).ToActionResult();
 
 
         [HttpGet(nameof(ConfirmEmail))]
-        public async Task<ActionResult<ConfirmEmailResponse>> ConfirmEmail([FromQuery] ConfirmEmailCommand confirmEmailCommand)
-            => Ok(await _sender.Send(confirmEmailCommand));
+        public async Task<ActionResult<Result<ConfirmEmailResponse>>> ConfirmEmail([FromQuery] ConfirmEmailCommand confirmEmailCommand)
+            => (await _sender.Send(confirmEmailCommand)).ToActionResult();
     }
 }

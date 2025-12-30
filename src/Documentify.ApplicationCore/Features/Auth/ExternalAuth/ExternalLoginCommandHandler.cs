@@ -9,8 +9,7 @@ namespace Documentify.ApplicationCore.Features.Auth.ExternalAuth
     {
         public async Task<Result<ExternalLoginCommandResponse>> Handle(ExternalLoginCommand request, CancellationToken cancellationToken)
         {
-            return Result<ExternalLoginCommandResponse>
-                    .Success(await externalAuthService.LoginOrRegister(ExternalLoginProvider.Google));
+            return await externalAuthService.LoginOrRegister(ExternalLoginProvider.Google);
         }
     }
 }

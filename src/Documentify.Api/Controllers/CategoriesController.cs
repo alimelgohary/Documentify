@@ -15,17 +15,19 @@ namespace Documentify.Api.Controllers
     {
         [HttpGet("{id}")]
         public async Task<ActionResult<Result<CategoryDto>>> GetById(Guid id, CancellationToken ct) 
-            => Ok(await _mediator.Send(new GetCategoryByIdQuery(id), ct)); 
+            => (await _mediator.Send(new GetCategoryByIdQuery(id), ct)).ToActionResult(); 
 
         [HttpGet]
         public async Task<ActionResult<Result<GetAllCategoriesResponse>>> Index(CancellationToken ct)
-            => Ok(await _mediator.Send(new GetAllCategoriesQuery(), ct));
+            => (await _mediator.Send(new GetAllCategoriesQuery(), ct)).ToActionResult();
 
         [HttpPost]
         [Authorize]
         public async Task<ActionResult<Result<AddCategoryResponse>>> Create([FromBody] AddCategoryCommand command, CancellationToken ct)
         {
             var result = await _mediator.Send(command, ct);
+            if(!result.IsSuccess)
+                return result.ToActionResult();
             return CreatedAtAction(nameof(GetById), new { Id = result.Data!.categoryId }, result);
         }
     }

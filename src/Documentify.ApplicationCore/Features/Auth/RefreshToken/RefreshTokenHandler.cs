@@ -7,8 +7,7 @@ namespace Documentify.ApplicationCore.Features.Auth.RefreshToken
     {
         public async Task<Result<RefreshTokenResponse>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
         {
-            return Result<RefreshTokenResponse>.Success(
-                await _authService.RefreshTokenAsync(request.OldRefreshToken, cancellationToken));
+            return await _authService.RefreshTokenAsync(request.OldRefreshToken, cancellationToken);
         }
     }
 }

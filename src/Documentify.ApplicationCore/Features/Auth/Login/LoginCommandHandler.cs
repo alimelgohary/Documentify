@@ -7,8 +7,7 @@ namespace Documentify.ApplicationCore.Features.Auth.Login
     {
         public async Task<Result<LoginCommandResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
-            return Result<LoginCommandResponse>.Success(
-                await authService.LoginAsync(request.UsernameOrEmail, request.Password));
+            return await authService.LoginAsync(request.UsernameOrEmail, request.Password);
         }
     }
 }

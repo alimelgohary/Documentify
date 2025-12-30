@@ -12,7 +12,7 @@ namespace Documentify.ApplicationCore.Features.Categories.GetAll
                 .Repository<Category, Guid>()
                 .ListAsync(new GetAllCategoriesSpec(), ct);
             var items = categories.Select(x => new CategoryDto(x.Id, x.Name)).ToList();
-            return Result < GetAllCategoriesResponse >.Success(
+            return ResultFactory.Success(
                 new GetAllCategoriesResponse(items, items.Count));
         }
     }

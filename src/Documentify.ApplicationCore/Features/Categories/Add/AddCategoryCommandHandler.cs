@@ -7,11 +7,11 @@ namespace Documentify.ApplicationCore.Features.Categories.Add
     {
         public async Task<Result<AddCategoryResponse>> Handle(AddCategoryCommand request, CancellationToken ct)
         {
-            // add pipeline to logging / handle not found exceptions
+            // TODO add pipeline to logging
             var category = new Category() { Name = request.categoryName };
             await _unitOfWork.Repository<Category, Guid>().AddAsync(category, ct);
             await _unitOfWork.CompleteAsync(ct);
-            return Result<AddCategoryResponse>.Success(
+            return ResultFactory.Success(
                 new AddCategoryResponse(categoryId: category.Id));
         }
     }

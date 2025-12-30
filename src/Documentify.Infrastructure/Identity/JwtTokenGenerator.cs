@@ -1,5 +1,5 @@
-﻿using Documentify.ApplicationCore.Common.Exceptions;
-using Documentify.ApplicationCore.Common.Interfaces;
+﻿using Documentify.ApplicationCore.Common.Interfaces;
+using Documentify.ApplicationCore.Features;
 using Documentify.Domain.Enums;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -13,7 +13,7 @@ namespace Documentify.Infrastructure.Identity
 {
     public class JwtTokenGenerator(IConfiguration _configuration, ILogger<JwtTokenGenerator> _logger) : ITokenGenerator
     {
-        public string GenerateToken(string userId, string userEmail, Role[] roles, JwtTokenType type)
+        public Result<string> GenerateToken(string userId, string userEmail, Role[] roles, JwtTokenType type)
         {
             int expiryMinutes = 0;
             string secret = "";
@@ -45,10 +45,10 @@ namespace Documentify.Infrastructure.Identity
                 signingCredentials: creds
             );
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return ResultFactory.Success<string>(new JwtSecurityTokenHandler().WriteToken(token));
         }
 
-        public void ValidateRefreshToken(string oldRefreshToken)
+        public Result ValidateRefreshToken(string oldRefreshToken)
         {
             var secret = _configuration[ConfigurationKeys.JwtRefreshSecret]!;
             string issuer = _configuration[ConfigurationKeys.JwtIssuer]!;
@@ -67,22 +67,23 @@ namespace Documentify.Infrastructure.Identity
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 }, out SecurityToken token);
+                return ResultFactory.Success();
             }
             catch (Exception ex)
             {
                 _logger.LogInformation("Invalid refresh token attempted" + ex.Message);
-                throw new BadRequestException("Validating token error");
+                return ResultFactory.Failure(ErrorType.BadInput, "Validating token error");
             }
         }
 
-        public string GenerateToken(string expiredToken, JwtTokenType type)
+        public Result<string> GenerateToken(string expiredToken, JwtTokenType type)
         {
             var token = new JwtSecurityTokenHandler().ReadJwtToken(expiredToken);
-            var email = token.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value
-                    ?? throw new BadRequestException("Invalid refresh token, no email");
+            var email = token.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            if (email is null) return ResultFactory.Failure<string>(ErrorType.BadInput, "Invalid refresh token, no email");
 
-            var id = token.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value
-                    ?? throw new BadRequestException("Invalid token, no sub");
+            var id = token.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if(id is null) return ResultFactory.Failure<string>(ErrorType.BadInput, "Invalid token, no sub");
 
             var rolesClaims = token.Claims.Where(c => c.Type == ClaimTypes.Role).ToList();
 
@@ -92,7 +93,7 @@ namespace Documentify.Infrastructure.Identity
                 if (Enum.TryParse(role.Value, out Role r))
                     roles.Add(r);
                 else
-                    throw new BadRequestException("Invalid token, invalid role");
+                    return ResultFactory.Failure<string>(ErrorType.BadInput, "Invalid token, invalid role");
             }
             return GenerateToken(id, email, roles.ToArray(), type);
         }

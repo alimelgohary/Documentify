@@ -8,8 +8,7 @@ namespace Documentify.ApplicationCore.Features.Auth.Register
     {
         public async Task<Result<RegisterCommandResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
-            return Result<RegisterCommandResponse>.Success(
-                await _authService.RegisterAsync(request.Username, request.Email, request.Password, [Role.User]));
+            return await _authService.RegisterAsync(request.Username, request.Email, request.Password, [Role.User]);
         }
     }
 }

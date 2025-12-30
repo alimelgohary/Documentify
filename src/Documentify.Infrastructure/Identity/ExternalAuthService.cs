@@ -1,5 +1,5 @@
-﻿using Documentify.ApplicationCore.Common.Exceptions;
-using Documentify.ApplicationCore.Common.Interfaces;
+﻿using Documentify.ApplicationCore.Common.Interfaces;
+using Documentify.ApplicationCore.Features;
 using Documentify.ApplicationCore.Features.Auth.Login;
 using Documentify.Domain.Enums;
 using Documentify.Infrastructure.Data;
@@ -20,11 +20,11 @@ namespace Documentify.Infrastructure.Identity
                                      ITokenGenerator tokenGenerator,
                                      IConfiguration _configuration) : IExternalAuthService
     {
-        public async Task<ExternalLoginCommandResponse> LoginOrRegister(ExternalLoginProvider externalLoginProvider)
+        public async Task<Result<ExternalLoginCommandResponse>> LoginOrRegister(ExternalLoginProvider externalLoginProvider)
         {
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
-                throw new Exception("Error loading external login information.");
+                return ResultFactory.Failure<ExternalLoginCommandResponse>(ErrorType.ServerError, "Error loading external login information.");
 
             string email = info.Principal.FindFirstValue(ClaimTypes.Email)!;
             string userId = info.Principal.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -41,12 +41,20 @@ namespace Documentify.Infrastructure.Identity
                 var roles = (await _userManager.GetRolesAsync(oldUser!))
                                 .Select(x => Enum.Parse<Role>(x))
                                 .ToArray();
-                return new ExternalLoginCommandResponse(
-                    AccessToken: tokenGenerator.GenerateToken(userId, email, roles, JwtTokenType.Jwt),
-                    RefreshToken: tokenGenerator.GenerateToken(userId, email, roles, JwtTokenType.Refresh),
+
+                var accessTokenRes = tokenGenerator.GenerateToken(userId, email, roles, JwtTokenType.Jwt);
+                if (accessTokenRes.IsSuccess == false)
+                    return ResultFactory.Failure<ExternalLoginCommandResponse>(accessTokenRes.ErrorType, accessTokenRes.Message);
+                var refreshTokenRes = tokenGenerator.GenerateToken(userId, email, roles, JwtTokenType.Refresh);
+                if (refreshTokenRes.IsSuccess == false)
+                    return ResultFactory.Failure<ExternalLoginCommandResponse>(refreshTokenRes.ErrorType, refreshTokenRes.Message);
+
+                return ResultFactory.Success(new ExternalLoginCommandResponse(
+                    AccessToken: accessTokenRes.Data!,
+                    RefreshToken: refreshTokenRes.Data!,
                     AccessTokenExpiry: DateTime.UtcNow.AddMinutes(expiryMinutes),
                     RefreshTokenExpiry: DateTime.UtcNow.AddMinutes(expiryMinutesRefresh)
-                );
+                ));
             }
 
             var user = new ApplicationUser
@@ -62,23 +70,30 @@ namespace Documentify.Infrastructure.Identity
                 transaction.Rollback();
                 var errors = string.Join(",", createResult.Errors.Select(e => e.Description));
                 _logger.LogWarning("User registration failed: {errors}", errors);
-                throw new BadRequestException("Registration failed: " + errors);
+                return ResultFactory.Failure<ExternalLoginCommandResponse>(ErrorType.BadInput, "Registration failed: " + errors);
             }
             var roleRes = await _userManager.AddToRoleAsync(user, Role.User.ToString());
             if (!roleRes.Succeeded)
             {
                 transaction.Rollback();
                 _logger.LogError(string.Join(",", roleRes.Errors.Select(x => x.Description)));
-                throw new BadRequestException("User registration failed duo to unknown error");
+                return ResultFactory.Failure<ExternalLoginCommandResponse>(ErrorType.BadInput, "User registration failed duo to unknown error");
             }
             await transaction.CommitAsync();
             await _userManager.AddLoginAsync(user, info);
-            return new ExternalLoginCommandResponse(
-                AccessToken: tokenGenerator.GenerateToken(userId, email, [Role.User], JwtTokenType.Jwt),
-                RefreshToken: tokenGenerator.GenerateToken(userId, email, [Role.User], JwtTokenType.Refresh),
+
+            var accessTokenRes1 = tokenGenerator.GenerateToken(userId, email, [Role.User], JwtTokenType.Jwt);
+            if (accessTokenRes1.IsSuccess == false)
+                return ResultFactory.Failure<ExternalLoginCommandResponse>(accessTokenRes1.ErrorType, accessTokenRes1.Message);
+            var refreshTokenRes1 = tokenGenerator.GenerateToken(userId, email, [Role.User], JwtTokenType.Refresh);
+            if (refreshTokenRes1.IsSuccess == false)
+                return ResultFactory.Failure<ExternalLoginCommandResponse>(refreshTokenRes1.ErrorType, refreshTokenRes1.Message);
+            return ResultFactory.Success(new ExternalLoginCommandResponse(
+                AccessToken: accessTokenRes1.Data!,
+                RefreshToken: refreshTokenRes1.Data!,
                 AccessTokenExpiry: DateTime.UtcNow.AddMinutes(expiryMinutes),
                 RefreshTokenExpiry: DateTime.UtcNow.AddMinutes(expiryMinutesRefresh)
-            );
+            ));
         }
     }
 }
