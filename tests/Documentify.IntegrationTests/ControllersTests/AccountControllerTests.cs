@@ -29,6 +29,7 @@ namespace Documentify.IntegrationTests.ControllersTests
         private const string pathRegister = path + "/Register";
         private const string pathLogin = path + "/Login";
         private const string pathRefresh = path + "/RefreshToken";
+        private const string pathConfirm = path + "/ConfirmEmail";
 
         private readonly NoDbWebApplicationFactory<Program> _factory;
         private readonly HttpClient _client;
@@ -140,9 +141,9 @@ namespace Documentify.IntegrationTests.ControllersTests
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var user = await userManager.FindByEmailAsync(testEmail);
             string token = await userManager.GenerateEmailConfirmationTokenAsync(user!);
-            var result = await userManager.ConfirmEmailAsync(user!, token);
-            if (!result.Succeeded)
-                throw new Exception("Email confirmation failed during login test setup." + string.Join(",", result.Errors.Select(x => x.Description)));
+            var result = await _client.GetAsync($"{pathConfirm}?email={WebUtility.UrlEncode(testEmail)}&token={WebUtility.UrlEncode(token)}");
+            if (!result.IsSuccessStatusCode)
+                throw new Exception("Email confirmation failed during login test setup." + await result.Content.ReadAsStringAsync());
 
             var loginResult = await _client.PostAsJsonAsync<LoginCommand>(pathLogin, new
             (
