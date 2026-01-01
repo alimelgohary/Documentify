@@ -32,7 +32,7 @@ namespace Documentify.Infrastructure
             public const string GoogleClientId = "Authentication:Google:ClientId";
             public const string GoogleClientSecret = "Authentication:Google:ClientSecret";
 
-            public const string DocumentifyConnectionString = "connectionStrings:DocumentifyConnection";
+            public const string DocumentifyConnectionString = "DocumentifyConnection";
 
             public const string MaxRequestTimeWarningThreshold = "MaxRequestTimeWarningThreshold";
 
