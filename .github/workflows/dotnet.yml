@@ -38,7 +38,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal
       
     - name: Publish
-    - run: dotnet publish -c Release -o ./publish
+      run: dotnet publish -c Release -r win-x86 -o ./publish
     
     - name: FTP Upload
       uses: SamKirkland/FTP-Deploy-Action@v4.3.6
