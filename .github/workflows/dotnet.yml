@@ -46,6 +46,6 @@ jobs:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./deploy-me/   
+        local-dir: ./publish
         server-dir: ./wwwroot/  
         delete-destination: false
