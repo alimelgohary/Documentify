@@ -20,6 +20,12 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+    - name: Get Secrets
+      run: |
+          # Use a heredoc to safely write the multiline secret content to a file
+          cat <<EOF > secrets.json
+          ${{ secrets.SECRETS_JSON }}
+          EOF
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
