@@ -27,9 +27,25 @@ jobs:
           cat <<EOF > secrets.json
           ${{ secrets.SECRETS_JSON }}
           EOF
+          
     - name: Restore dependencies
       run: dotnet restore
+      
     - name: Build
       run: dotnet build --no-restore
+      
     - name: Test
       run: dotnet test --no-build --verbosity normal
+      
+    - name: Publish
+    - run: dotnet publish -c Release -o ./publish
+    
+    - name: FTP Upload
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./deploy-me/   
+        server-dir: ./wwwroot/  
+        delete-destination: false
