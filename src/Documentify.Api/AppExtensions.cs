@@ -10,7 +10,7 @@ namespace Documentify.Api
         {
             app.UseSerilogRequestMiddleware();
             app.UseMiddleware<IdempotencyMiddleware>();
-            if (app.Environment.IsDevelopment())
+            if (app.Environment.IsDevelopment() || true)
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
