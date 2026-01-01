@@ -8,25 +8,28 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  workflow_dispatch:
 
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 8.0
     - name: Get Secrets
+      shell: pwsh
       run: |
           cd src/Documentify.Api
           # Use a heredoc to safely write the multiline secret content to a file
-          cat <<EOF > secrets.json
-          ${{ secrets.SECRETS_JSON }}
-          EOF
+          $content = @"
+              ${{ secrets.SECRETS_JSON }}
+          "@
+          $content | Out-File -FilePath "secrets.json" -Encoding utf8
           
     - name: Restore dependencies
       run: dotnet restore
@@ -38,14 +41,12 @@ jobs:
       run: dotnet test --no-build --verbosity normal
       
     - name: Publish
-    - run: dotnet publish -c Release -o ./publish
+      run: dotnet publish --configuration Release --output ./publish --runtime win-x86
     
-    - name: FTP Upload
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+    - name: Deploy to MonsterASP.NET via WebDeploy
+      uses: rasmusbuchholdt/simply-web-deploy@2.1.0
       with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./deploy-me/   
-        server-dir: ./wwwroot/  
-        delete-destination: false
+        website-name: ${{ secrets.WEBSITE_NAME }}
+        server-computer-name: ${{ secrets.SERVER_COMPUTER_NAME }}
+        server-username: ${{ secrets.SERVER_USERNAME }}
+        server-password: ${{ secrets.SERVER_PASSWORD }}
