@@ -41,11 +41,10 @@ jobs:
     - name: Publish
       run: dotnet publish -c Release -r win-x86 -o ./publish
     
-    - name: FTP Upload
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+    - name: Deploy to MonsterASP.NET via WebDeploy
+      uses: rasmusbuchholdt/simply-web-deploy@2.1.0
       with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./publish/
-        server-dir: ./wwwroot/
+        website-name: ${{ secrets.WEBSITE_NAME }}
+        server-computer-name: ${{ secrets.SERVER_COMPUTER_NAME }}
+        server-username: ${{ secrets.SERVER_USERNAME }}
+        server-password: ${{ secrets.SERVER_PASSWORD }}
