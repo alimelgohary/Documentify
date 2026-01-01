@@ -22,6 +22,7 @@ jobs:
         dotnet-version: 8.0.x
     - name: Get Secrets
       run: |
+          cd src/Documentify.Api
           # Use a heredoc to safely write the multiline secret content to a file
           cat <<EOF > secrets.json
           ${{ secrets.SECRETS_JSON }}
