@@ -104,7 +104,9 @@ namespace Documentify.Infrastructure.Identity
 
         public async Task<Result<RefreshTokenResponse>> RefreshTokenAsync(string oldRefreshToken, CancellationToken cancellationToken)
         {
-            _tokenGenerator.ValidateRefreshToken(oldRefreshToken);
+            var validateResult = _tokenGenerator.ValidateRefreshToken(oldRefreshToken);
+            if(validateResult.IsSuccess == false)
+                return ResultFactory.Failure<RefreshTokenResponse>(validateResult.ErrorType, validateResult.Message);
 
             bool IsRevoked = await unitOfWork.Repository<RevokedRefreshToken, int>()
                                                     .ExistsAsync(x => x.Token == oldRefreshToken);

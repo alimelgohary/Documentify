@@ -220,8 +220,17 @@ namespace Documentify.IntegrationTests.ControllersTests
         [Fact]
         public async Task Calling_Refresh_Token_With_Wrong_Signature_Fails()
         {
-            string testEmail4 = "user4@gmail.com";
-            Guid userId = Guid.NewGuid();
+            string testUsername = "Wrong_Signature_Fails";
+            string testEmail = "Wrong_Signature_Fails@gmail.com";
+
+            var res = await RegisterConfirmLoginUserAsync(testUsername, testEmail);
+            using var scope = _factory.Services.CreateScope();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var _conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+            string userId = userManager.Users
+                                    .Where(x => x.NormalizedEmail == userManager.NormalizeEmail(testEmail))
+                                    .Select(x => x.Id)
+                                    .First();
             var wrongSecret = new StringBuilder(32);
             for (int i = 0; i < 32; i++)
             {
@@ -231,11 +240,10 @@ namespace Documentify.IntegrationTests.ControllersTests
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim(ClaimTypes.Email, testEmail4)
+                new Claim(ClaimTypes.NameIdentifier, userId),
+                new Claim(ClaimTypes.Email, testEmail)
             };
-            var scope = _factory.Services.CreateScope();
-            var _conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+            
             string refreshToken = new JwtSecurityTokenHandler().WriteToken(new JwtSecurityToken(
                 claims: claims,
                 signingCredentials: creds,
@@ -244,25 +252,35 @@ namespace Documentify.IntegrationTests.ControllersTests
             ));
 
             var httpResult = await _client.PostAsJsonAsync<RefreshTokenCommand>(pathRefresh, new(refreshToken));
-            var stringResult = await httpResult.Content.ReadAsStringAsync();
 
             if (httpResult.IsSuccessStatusCode)
+            {
+                var stringResult = await httpResult.Content.ReadAsStringAsync();
                 Assert.Fail($"Request should fails because of wrong secret signing key, {httpResult.StatusCode}, {stringResult}");
+            }
         }
         [Fact]
         public async Task Calling_Refresh_Token_With_Wrong_Issuer_Fails()
         {
-            string testEmail4 = "user4@gmail.com";
-            Guid userId = Guid.NewGuid();
-            var scope = _factory.Services.CreateScope();
+            string testUsername = "Wrong_Issuer_Fails";
+            string testEmail = "Wrong_Issuer_Fails@gmail.com";
+
+            var res = await RegisterConfirmLoginUserAsync(testUsername, testEmail);
+            using var scope = _factory.Services.CreateScope();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var _conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+            string userId = userManager.Users
+                                    .Where(x => x.NormalizedEmail == userManager.NormalizeEmail(testEmail))
+                                    .Select(x => x.Id)
+                                    .First();
+            
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_conf[ConfigurationKeys.JwtRefreshSecret]!));
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim(ClaimTypes.Email, testEmail4)
+                new Claim(ClaimTypes.NameIdentifier, userId),
+                new Claim(ClaimTypes.Email, testEmail)
             };
             string refreshToken = new JwtSecurityTokenHandler().WriteToken(new JwtSecurityToken(
                 claims: claims,
@@ -272,26 +290,35 @@ namespace Documentify.IntegrationTests.ControllersTests
             ));
 
             var httpResult = await _client.PostAsJsonAsync<RefreshTokenCommand>(pathRefresh, new(refreshToken));
-            var stringResult = await httpResult.Content.ReadAsStringAsync();
 
             if (httpResult.IsSuccessStatusCode)
-                Assert.Fail($"Request should fails because of wrong issuer, {httpResult.StatusCode}, {stringResult}");
+            {
+                var stringResult = await httpResult.Content.ReadAsStringAsync();
+                Assert.Fail($"Request should fail because of wrong issuer, {httpResult.StatusCode}, {stringResult}");
+            }
         }
 
         [Fact]
         public async Task Calling_Refresh_Token_With_Expired_Token_Fails()
         {
-            string testEmail4 = "user4@gmail.com";
-            Guid userId = Guid.NewGuid();
-            var scope = _factory.Services.CreateScope();
+            string testUsername = "Expired_Token_Fails";
+            string testEmail = "Expired_Token_Fails@gmail.com";
+
+            var res = await RegisterConfirmLoginUserAsync(testUsername, testEmail);
+            using var scope = _factory.Services.CreateScope();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var _conf = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+            string userId = userManager.Users
+                                    .Where(x => x.NormalizedEmail == userManager.NormalizeEmail(testEmail))
+                                    .Select(x => x.Id)
+                                    .First();
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_conf[ConfigurationKeys.JwtRefreshSecret]!));
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim(ClaimTypes.Email, testEmail4)
+                new Claim(ClaimTypes.NameIdentifier, userId),
+                new Claim(ClaimTypes.Email, testEmail)
             };
             string refreshToken = new JwtSecurityTokenHandler().WriteToken(new JwtSecurityToken(
                 claims: claims,
@@ -301,10 +328,12 @@ namespace Documentify.IntegrationTests.ControllersTests
             ));
 
             var httpResult = await _client.PostAsJsonAsync<RefreshTokenCommand>(pathRefresh, new(refreshToken));
-            var stringResult = await httpResult.Content.ReadAsStringAsync();
 
             if (httpResult.IsSuccessStatusCode)
+            {
+                var stringResult = await httpResult.Content.ReadAsStringAsync();
                 Assert.Fail($"Request should fails because of expired token, {httpResult.StatusCode}, {stringResult}");
+            }
         }
 
     }
