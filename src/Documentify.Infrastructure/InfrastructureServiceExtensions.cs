@@ -38,6 +38,8 @@ namespace Documentify.Infrastructure
 
             public const string GmailUser = "gmail_user";
             public const string GmailPass = "gmail_password";
+
+            public const string HostUrls = "ASPNETCORE_URLS";
         }
         static void ValidateConfiguration(IConfiguration configuration, ILogger logger)
         {

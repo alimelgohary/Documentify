@@ -172,7 +172,7 @@ namespace Documentify.Infrastructure.Identity
         async Task<string> GenerateConfirmationLink(ApplicationUser user)
         {
             string token = await _userManager.GenerateEmailConfirmationTokenAsync(user!);
-            var baseUrl = _configuration["ASPNETCORE_URLS"]?.Split(";").FirstOrDefault();
+            var baseUrl = _configuration[ConfigurationKeys.HostUrls]?.Split(";").FirstOrDefault();
             var userMail = UrlEncoder.Default.Encode(user.Email!);
             token = UrlEncoder.Default.Encode(token);
             return $"{baseUrl}/Account/ConfirmEmail?token={token}&email={userMail}";
